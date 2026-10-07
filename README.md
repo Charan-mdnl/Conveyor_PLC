@@ -98,6 +98,7 @@ PLC/
 | 7 Oct 2026 | The tool was checked again and hardened: a lock means only function 03 (read) can ever be sent; fixed a gap bug that would skip parameters. |
 | 7 Oct 2026 | **Old VFD read successfully** (only the VFD was powered). See section 5. |
 | 7 Oct 2026 | Folder reorganised (section 3). README created. New BOM made from the two purchase bills. |
+| 7 Oct 2026 | Also pushed to the company repo **https://github.com/charanxp/Conveyor_PLC** (public). |
 | 7 Oct 2026 | Whole project pushed to GitHub **https://github.com/Charan-mdnl/Conveyor_PLC** (branch `main`). The repo is **public**: the user chose to include everything, the bills too. |
 
 ---
@@ -179,7 +180,7 @@ Not on any bill yet (bought at other shops, according to the user; details still
 5. **Q0.2 wire** (VFD fault reset). Look on the old panel to see whether Q0.2 goes to a VFD input.
 6. **Camera:** confirm where `05_Camera/final.mfa` came from (an export from the old camera?). Load it into the new camera with HIKROBOT MVS / IDMVS, and set IP 192.168.0.78.
 7. **Rebuild guide, section 7** still says the VFD tool "was not tried on the real drive". Update it with the real result (see `pdf_source`; the rebuild steps are in the memory notes).
-8. **GitHub token:** the token was pasted in chat on 7 Oct. Revoke it on GitHub (Settings → Developer settings → Personal access tokens) and make a new one when needed.
+8. **GitHub tokens:** two tokens (Charan-mdnl and charanxp) were pasted in chat on 7 Oct. Revoke both on GitHub (Settings → Developer settings → Personal access tokens) and make new ones when needed.
 
 ---
 
@@ -195,6 +196,7 @@ Not on any bill yet (bought at other shops, according to the user; details still
 
 ## 9. Change log of this README
 
+- 2026-10-07: pushed to the company repo charanxp/Conveyor_PLC too.
 - 2026-10-07: pushed to GitHub (public, by the user's choice).
 - 2026-10-07: created. Folder reorganised, VFD readout recorded, BOM updated from the Pavitra + Nanologic bills.
 
@@ -202,5 +204,8 @@ Not on any bill yet (bought at other shops, according to the user; details still
 
 ## 10. GitHub
 
-- Repo: https://github.com/Charan-mdnl/Conveyor_PLC (public), branch `main`. The local folder `PLC/` is the git working copy.
+- Two copies, both public, branch `main`, same content:
+  - personal: https://github.com/Charan-mdnl/Conveyor_PLC  (git remote `origin`)
+  - company:  https://github.com/charanxp/Conveyor_PLC     (git remote `company`)
+- The local folder `PLC/` is the git working copy. After each change push to BOTH: `git push origin main` and `git push company main`.
 - To upload changes: `git add -A && git commit -m "..." && git push`. Pushing needs a token or SSH key; never put the token in a file.
