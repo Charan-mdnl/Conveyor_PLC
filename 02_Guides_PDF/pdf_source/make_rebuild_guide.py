@@ -17,10 +17,13 @@ PICS = os.path.join(ROOT, "03_Wiring_Photos")
 
 d = Doc()
 d.title("Conveyor + Camera Control Panel",
-        "Rebuild guide, Revision 2 (6 October 2026): panel, PLC, HMI, VFD, camera and PC program.<br/>"
+        "Rebuild guide, Revision 3 (9 October 2026): panel, PLC, HMI, VFD, camera and PC program.<br/>"
         "Based on the old TIA Portal project \"latest plc\", your hand drawings, your BOM, your explanation of how the "
         "machine works, and the PC and camera files in the folder conveyor_automation-main.")
 
+d.box("<b>What changed in Revision 3.</b> Section 7 now shows the real values read from the old drive on 7 October 2026 "
+      "(motor current 07.00 corrected: the old drive holds 2.5 A, not 1.82 A), and the VFD tool notes say it has been used on the real drive. "
+      "Files are now in numbered folders (see README.md in the PLC folder).", OKC)
 d.box("<b>What changed from Revision 1.</b><br/>"
       "1. The IR sensor is wired to the <b>camera</b>, not to the PLC. PLC input I0.0 stays empty. Revision 1 told you to "
       "wire the sensor to I0.0. That was wrong.<br/>"
@@ -258,18 +261,20 @@ d.bullets([
     "and the drive NPN / PNP switch must be in the same position as on the old drive.",
     "<b>Relay:</b> RC, RA, RB as in section 4.2.",
     "<b>Speed:</b> find where the old drive gets its speed (keypad knob, fixed parameter or a potentiometer) and copy it. The PLC does not send a speed value."])
-d.p("Parameters that matter for this machine. The numbers are the usual Delta VFD-EL numbers; confirm them in the VFD-EL-W manual and always use the <b>values from the old drive</b>.")
-d.table(["Parameter (typical no.)", "Meaning", "Expected for this machine"], [
-    ["01.00", "Maximum output frequency", "Copy old value. Do not assume 50 Hz: if the old drive's display shows F70.0, its speed command is 70.0 Hz, so the maximum is 70 Hz or more."],
-    ["01.01 / 01.02", "Motor rated frequency, motor rated voltage", "50 Hz, 230 V (copy old)"],
-    ["01.09 / 01.10", "Acceleration / deceleration time", "Copy old values"],
-    ["02.00", "Source of the speed command", "Copy old value"],
-    ["02.01", "Source of the run command", "External terminals (not keypad)"],
-    ["03.00", "Function of relay RA / RB / RC", "Fault indication"],
-    ["04.04", "2-wire / 3-wire control mode", "2-wire: MI1 = forward / stop, MI2 = reverse / stop"],
-    ["04.05 onward", "Function of MI3, MI4 ...", "Fault reset on the input wired to Q0.2, if used"],
-    ["07.00", "Motor rated current", "About 1.82 A (copy old value)"],
-], [42, 72, 60])
+d.p("Parameters that matter for this machine, with the <b>raw values read from the old drive on 7 October 2026</b> "
+    "(full list: 04_VFD/old_vfd_2026-10-07/old_vfd_parameters.txt). Raw values have no decimal point (5000 = 50.00 Hz). "
+    "Option numbers (like 02.00 = 4) are codes: check their meaning in the Delta VFD-EL manual, but always set the <b>same value as the old drive</b>.")
+d.table(["Parameter", "Meaning", "Old drive (raw)", "Note"], [
+    ["01.00", "Maximum output frequency", "7000", "70.00 Hz"],
+    ["01.01 / 01.02", "Motor rated frequency, motor rated voltage", "5000 / 2200", "50.00 Hz / 220.0 V"],
+    ["01.09 / 01.10", "Acceleration / deceleration time", "50 / 5", "Copy exactly (0.1 s steps: 5.0 s / 0.5 s, check in manual)"],
+    ["02.00", "Source of the speed command", "4", "Option code: copy exactly"],
+    ["02.01", "Source of the run command", "1", "Option code: copy exactly (expected: external terminals)"],
+    ["03.00", "Function of relay RA / RB / RC", "8", "Option code: copy exactly (expected: fault indication)"],
+    ["04.04", "2-wire / 3-wire control mode", "0", "Option code: copy exactly"],
+    ["04.05 / 04.06", "Function of further MI inputs", "0 / 0", "Copy exactly. Compare with the Q0.2 wire question (section 4.1)"],
+    ["07.00", "Motor rated current", "25", "2.5 A. Copy this. (The motor plate says 1.82 A; setting 1.82 A would be a deliberate change from the old machine, for an electrician to decide.)"],
+], [24, 52, 24, 74])
 d.h2("How to copy the parameters from the old drive")
 d.box("<b>Do not connect the drive to the laptop with an Ethernet cable.</b> The RJ45 socket on the drive looks like a network socket, "
       "but it is an <b>RS-485 serial</b> port. A laptop network port cannot talk to it, and one pin of that socket carries a supply voltage.", BAD)
@@ -280,15 +285,15 @@ d.table(["Way", "What you need", "Steps"], [
     ["B. Laptop and the tool in your folder", "A USB-to-RS485 adapter (for example Delta IFD6500 or a generic one) and two wires.<br/>"
      "Drive terminal <b>SG+</b> to adapter A / D+, terminal <b>SG-</b> to adapter B / D-. "
      "The same two signals are on the RJ45 socket: pin 5 = SG+, pin 4 = SG-.",
-     "1. Old drive ON, adapter connected:<br/><font face=\"DVM\">python3 read_vfd_parameters.py --out old_vfd.csv</font><br/>"
-     "2. New drive ON, adapter connected:<br/><font face=\"DVM\">python3 read_vfd_parameters.py --out new_vfd.csv</font><br/>"
-     "3. <font face=\"DVM\">python3 read_vfd_parameters.py --compare old_vfd.csv new_vfd.csv</font><br/>"
+     "1. Old drive: DONE on 7 Oct 2026, saved in 04_VFD/old_vfd_2026-10-07/.<br/>"
+     "2. New drive ON, adapter connected:<br/><font face=\"DVM\">python3 04_VFD/read_vfd_parameters.py --port /dev/ttyUSB0 --out new_vfd.csv</font><br/>"
+     "3. <font face=\"DVM\">python3 04_VFD/read_vfd_parameters.py --compare 04_VFD/old_vfd_2026-10-07/old_vfd_parameters.csv new_vfd.csv</font><br/>"
      "It prints only the parameters that differ. Enter those on the new drive with the keypad."],
     ["C. Delta PC software", "The same adapter and Delta's free VFDSoft program.",
      "It can save all parameters to a file and write them into the new drive. Check first that your VFDSoft version lists the VFD-EL-W."],
 ], [30, 56, 88])
-d.bullets(["The tool <b>read_vfd_parameters.py</b> is in your PLC folder. It only reads and never writes to the drive. It finds the port and the "
-           "communication settings by itself. I tested it against a simulated drive; it has not yet been tried on your real drive.",
+d.bullets(["The tool <b>04_VFD/read_vfd_parameters.py</b> only reads and never writes to the drive (it refuses to send anything but Modbus function 03). "
+           "It was used on the real old drive on 7 October 2026: Modbus ASCII 7N2, 9600 baud, address 1, 306 parameters, all group 00 values matching the keypad.",
            "Its numbers are raw: the drive stores 10.0 as 100 and 50.00 as 5000. Compare raw with raw.",
            "The SG+ / SG- screw terminals and the RJ45 pins (3 = GND, 4 = SG-, 5 = SG+) are from Delta's VFD-EL-W catalog. I could read only a summary of it, "
            "so look for the labels SG+ and SG- on the terminal strip of your drive before you connect. If you use the RJ45 socket, leave all other pins unconnected and insulated.",
@@ -456,5 +461,5 @@ for k, (name, caption, width) in enumerate([
     d.add(KeepTogether([Paragraph(caption, ST["h2"]), Image(path, width=width * mm, height=width * mm * h / w)]))
     d.sp(8)
 
-d.build(OUT, "Conveyor + Camera Control Panel - rebuild guide, revision 2", "Conveyor + Camera Control Panel - Rebuild Guide (Rev 2)")
+d.build(OUT, "Conveyor + Camera Control Panel - rebuild guide, revision 3", "Conveyor + Camera Control Panel - Rebuild Guide (Rev 3)")
 print("ok", OUT)

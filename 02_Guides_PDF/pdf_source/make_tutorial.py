@@ -11,9 +11,12 @@ from common import BAD, BOX, CHK, COIL, NC, NO, OKC, RST, SET, ST, Doc
 OUT = sys.argv[1]
 d = Doc()
 d.title("Write the Conveyor Program Yourself",
-        "A to Z in TIA Portal V21, Revision 2 (6 October 2026): new project, hardware, tags, data blocks, ladder logic, "
+        "A to Z in TIA Portal V21, Revision 2.1 (9 October 2026): new project, hardware, tags, data blocks, ladder logic, "
         "Modbus, HMI, download and test.<br/>Every name, address and value is taken from the old project \"latest plc\".")
 
+d.box("<b>New: read the companion guide \"Understand the Conveyor Program\"</b> (Conveyor_Program_Explained.pdf, same folder). "
+      "This guide says <b>what to click</b>; the companion says <b>what each part means, why it is there</b> (tags, data blocks, every network) "
+      "and how to design a program from a problem statement. Its first page shows which part to read with which part of this guide.", OKC)
 d.box("<b>What changed from Revision 1.</b><br/>"
       "1. Block <b>FC_AUTO</b> (part 8) now teaches the logic the real machine uses: the conveyor runs while the cycle is started "
       "and Modbus register 40001 is 0. Revision 1 taught a sensor-stop cycle as the main logic. On your machine that cycle is switched off, "
@@ -431,5 +434,5 @@ d.bullets([
     "ACTIVE and CONVEYOR OFF2 (normally open), MOVE 30 to AUTO STATUS (HMI text WAITING FOR CAMERA ACK). It never becomes true now.",
     "So the old FC_AUTO has six networks: start / stop memory, the big network, A5, the status network, A6 and A7."])
 
-d.build(OUT, "Write the Conveyor Program Yourself - TIA Portal V21, revision 2", "Write the Conveyor Program Yourself - TIA Portal V21 (Rev 2)")
+d.build(OUT, "Write the Conveyor Program Yourself - TIA Portal V21, revision 2.1", "Write the Conveyor Program Yourself - TIA Portal V21 (Rev 2.1)")
 print("ok", OUT)

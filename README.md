@@ -3,7 +3,7 @@
 **Master notes file.** Every time something is done in this project, this file is updated.
 Read this file first before doing any work on the project.
 
-Last updated: **7 Oct 2026**
+Last updated: **9 Oct 2026**
 
 ---
 
@@ -68,9 +68,10 @@ PLC/
 │   ├── SIMPLE FINEL TCPIP START STOP PROSS111.backup/(.zip)   older backup: HMI compile data only, no PLC logic
 │   └── conveyor_automation-main/ PC program (Frontend = Lux WMS app + backend) and old camera config files
 ├── 02_Guides_PDF/
-│   ├── Conveyor_Panel_Rebuild_Guide.pdf          how to build/wire/load the new machine (Rev 2, 14 pages)
-│   ├── Conveyor_Program_From_Scratch_TIA_V21.pdf  learn to write the same PLC program yourself (Rev 2, 16 pages)
-│   └── pdf_source/                                Python scripts that generate the two PDFs
+│   ├── Conveyor_Panel_Rebuild_Guide.pdf          how to build/wire/load the new machine (Rev 3, 14 pages)
+│   ├── Conveyor_Program_From_Scratch_TIA_V21.pdf  HOW: every click to write the PLC + HMI program yourself (Rev 2.1, 16 pages)
+│   ├── Conveyor_Program_Explained.pdf             WHY: meaning of tags/DBs/blocks/networks + design method from a problem statement (Rev 1, 17 pages)
+│   └── pdf_source/                                Python scripts that generate the three PDFs (make_*.py, common.py)
 ├── 03_Wiring_Photos/             hand drawings of the old panel wiring (5 Oct 2026)
 ├── 04_VFD/
 │   ├── read_vfd_parameters.py    READ-ONLY tool: reads all VFD parameters over RS-485
@@ -98,7 +99,11 @@ PLC/
 | 7 Oct 2026 | The tool was checked again and hardened: a lock means only function 03 (read) can ever be sent; fixed a gap bug that would skip parameters. |
 | 7 Oct 2026 | **Old VFD read successfully** (only the VFD was powered). See section 5. |
 | 7 Oct 2026 | Folder reorganised (section 3). README created. New BOM made from the two purchase bills. |
-| 7 Oct 2026 | Also pushed to the company repo **https://github.com/charanxp/Conveyor_PLC** (public). |
+| 7 Oct 2026 | Company repo **https://github.com/charanxp/Conveyor_PLC** added as git remote `company`. The push was blocked by Claude Code's safety check: **the user must run the push** (section 10). |
+| 9 Oct 2026 | User: the how-to guide says what to click but not what it means. New PDF **Conveyor_Program_Explained.pdf** covers the scan cycle, a glossary, NO/NC buttons vs contacts, a 10-step design method from a problem statement (worked on this conveyor), why each tag/flag/DB/block exists and why this many, every network explained, signal stories, Modbus, HMI, exercises and fact vs inference. The tutorial (Rev 2.1) now points to it. |
+| 9 Oct 2026 | Verified from the original file: OB1 call order = FC_AUTO, FC_ALARMS, FC_GENERAL, FC_MANUAL, FC_OUTPUTS, FC_TCP_IP. The PC writes 40001 with Modbus function 06, address 0 (server.py): 0/1 from its Start/Stop and 1 on a QR count mismatch. |
+| 9 Oct 2026 | User's 2nd wiring photo (power distribution) checked against the rebuild guide: **matches** (main switch → C10 → VFD → motor; main switch → C6 → socket + 24 V supply → 2 A MCB → sensor, Ethernet switch, HMI, PLC). |
+| 9 Oct 2026 | Rebuild guide → **Rev 3**: section 7 shows the real old-drive values; **07.00 corrected** (the old drive holds 25 = 2.5 A, not "about 1.82 A"); the VFD tool notes now say it was used on the real drive, with the new paths. |
 | 7 Oct 2026 | Whole project pushed to GitHub **https://github.com/Charan-mdnl/Conveyor_PLC** (branch `main`). The repo is **public**: the user chose to include everything, the bills too. |
 
 ---
@@ -179,7 +184,7 @@ Not on any bill yet (bought at other shops, according to the user; details still
 4. **Red button reverses the conveyor in MANUAL?** The user says so, but the saved program has reverse only on the HMI REV JOG button. Test it on the old machine. If it is true, upload the program from the old PLC (the PLC may hold a newer version than the file).
 5. **Q0.2 wire** (VFD fault reset). Look on the old panel to see whether Q0.2 goes to a VFD input.
 6. **Camera:** confirm where `05_Camera/final.mfa` came from (an export from the old camera?). Load it into the new camera with HIKROBOT MVS / IDMVS, and set IP 192.168.0.78.
-7. **Rebuild guide, section 7** still says the VFD tool "was not tried on the real drive". Update it with the real result (see `pdf_source`; the rebuild steps are in the memory notes).
+7. **GitHub push not done yet.** The local commits (7 Oct and 9 Oct) are not on either GitHub repo. The user must run `git push origin main` and `git push company main` (section 10).
 8. **GitHub tokens:** two tokens (Charan-mdnl and charanxp) were pasted in chat on 7 Oct. Revoke both on GitHub (Settings → Developer settings → Personal access tokens) and make new ones when needed.
 
 ---
@@ -196,8 +201,9 @@ Not on any bill yet (bought at other shops, according to the user; details still
 
 ## 9. Change log of this README
 
-- 2026-10-07: pushed to the company repo charanxp/Conveyor_PLC too.
-- 2026-10-07: pushed to GitHub (public, by the user's choice).
+- 2026-10-09: new Explained PDF, tutorial Rev 2.1, rebuild guide Rev 3 (real VFD values, 07.00 fix); wiring photo 2 verified; OB1 order verified.
+- 2026-10-07: company repo charanxp/Conveyor_PLC added as a remote (push still to be done by the user).
+- 2026-10-07: pushed to GitHub Charan-mdnl/Conveyor_PLC (public, by the user's choice).
 - 2026-10-07: created. Folder reorganised, VFD readout recorded, BOM updated from the Pavitra + Nanologic bills.
 
 ---
@@ -208,4 +214,5 @@ Not on any bill yet (bought at other shops, according to the user; details still
   - personal: https://github.com/Charan-mdnl/Conveyor_PLC  (git remote `origin`)
   - company:  https://github.com/charanxp/Conveyor_PLC     (git remote `company`)
 - The local folder `PLC/` is the git working copy. After each change push to BOTH: `git push origin main` and `git push company main`.
+- Claude Code's safety check blocks Claude from pushing, so **the user runs the push** in the VS Code terminal: username = the account name, password = that account's token.
 - To upload changes: `git add -A && git commit -m "..." && git push`. Pushing needs a token or SSH key; never put the token in a file.
