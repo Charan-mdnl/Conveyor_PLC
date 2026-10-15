@@ -1,0 +1,2 @@
+parameter,modbus_address,new_drive_now,write_value,reason
+06.06,0x0606,2,0,motor overload protection ON (standard motor)

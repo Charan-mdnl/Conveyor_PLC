@@ -1,0 +1,116 @@
+"""Parameter names, scaling and factory values from the Delta VFD-EL user manual (2017/06, chapter 4.1).
+
+Used by make_rebuild_guide.py to explain the values read from the old drive (VFD004EL21W-1).
+The drive is the EL-W variant of the same family: it has a few extra parameters that the VFD-EL manual does not list.
+Format: number: (name, decimals, unit, factory value as printed in the manual or None, meaning of option codes or "")
+decimals = None means: scaling not certain on the EL-W, show the raw number only.
+"""
+
+PARAMS = {
+    "00.00": ("Identity code of the drive", 0, "", None, "read only"),
+    "00.01": ("Rated current of the drive", 1, "A", None, "read only"),
+    "00.02": ("Parameter reset", 0, "", "0", "0 = normal; 9 / 10 = reset ALL to factory. Never copy, never set"),
+    "00.05": ("User-defined coefficient K", 1, "", "1.0", ""),
+    "00.06": ("Software version", 2, "", None, "read only"),
+    "00.07": ("(not in the VFD-EL manual)", 0, "", None, "EL-W only; leave"),
+    "00.11": ("(reserved in the VFD-EL manual)", 0, "", None, "EL-W only; compare with the new drive"),
+    "00.12": ("50 Hz base voltage selection", 0, "", "0", "0 = 230 V / 400 V, 1 = 220 V / 380 V"),
+    "01.00": ("Maximum output frequency", 2, "Hz", "60.00", ""),
+    "01.01": ("Maximum voltage frequency (motor rated frequency)", 2, "Hz", "60.00", ""),
+    "01.02": ("Maximum output voltage (motor rated voltage)", 1, "V", "220.0", ""),
+    "01.03": ("Mid-point frequency", 2, "Hz", "1.50", ""),
+    "01.04": ("Mid-point voltage", 1, "V", "10.0", ""),
+    "01.05": ("Minimum output frequency", 2, "Hz", "1.50", ""),
+    "01.06": ("Minimum output voltage", 1, "V", "10.0", ""),
+    "01.07": ("Output frequency upper limit", 1, "%", "110.0", ""),
+    "01.09": ("Acceleration time 1", 1, "s", "10.0", ""),
+    "01.10": ("Deceleration time 1", 1, "s", "10.0", ""),
+    "01.11": ("Acceleration time 2", 1, "s", "10.0", "not used (no input selects time 2)"),
+    "01.12": ("Deceleration time 2", 1, "s", "10.0", "not used (no input selects time 2)"),
+    "01.13": ("Jog acceleration time", 1, "s", "1.0", "drive jog function, not used"),
+    "01.14": ("Jog deceleration time", 1, "s", "1.0", "drive jog function, not used"),
+    "01.15": ("Jog frequency", 2, "Hz", "6.00", "drive jog function, not used"),
+    "01.21": ("Simple positioning stop frequency 1", 2, "Hz", "5.00", "not used"),
+    "01.22": ("Simple positioning stop frequency 2", 2, "Hz", "10.00", "not used"),
+    "01.23": ("Simple positioning stop frequency 3", 2, "Hz", "20.00", "not used"),
+    "01.24": ("Simple positioning stop frequency 4", 2, "Hz", "30.00", "not used"),
+    "01.25": ("Simple positioning stop frequency 5", 2, "Hz", "40.00", "not used"),
+    "01.26": ("Simple positioning stop frequency 6", 2, "Hz", "50.00", "not used"),
+    "01.27": ("Simple positioning stop frequency 7", 2, "Hz", "60.00", "not used"),
+    "02.00": ("Source of the speed (frequency) command", 0, "", "1",
+              "0 = keypad UP / DOWN keys, 1 = 0-10 V on AVI, 2 = 4-20 mA on ACI, 3 = RS-485, 4 = keypad potentiometer (knob)"),
+    "02.01": ("Source of the run command", 0, "", "1", "0 = keypad, 1 = external terminals (keypad STOP works), 2 = external terminals (keypad STOP off)"),
+    "02.02": ("Stop method", 0, "", "0", "0 = ramp to stop"),
+    "02.03": ("PWM carrier frequency", 0, "kHz", "8", ""),
+    "02.04": ("Motor direction control", 0, "", "0", "0 = forward and reverse allowed"),
+    "02.05": ("Run at power-on", 0, "", "1", "1 = do not run by itself when power comes on"),
+    "02.06": ("Loss of ACI signal", 0, "", "1", "analog input not used"),
+    "02.08": ("UP / DOWN rate", 2, "Hz", "0.01", "not used"),
+    "02.11": ("Keypad frequency command", 2, "Hz", "60.00", "not used (speed comes from the knob)"),
+    "02.12": ("Communication frequency command", 2, "Hz", "60.00", "not used"),
+    "02.15": ("Initial frequency setpoint", 2, "Hz", "60.00", "not used"),
+    "02.16": ("Display: master frequency source", 0, "", None, "read only. 1 = first source (02.00)"),
+    "02.17": ("Display: operation command source", 0, "", None, "read only. 4 = external terminals"),
+    "03.00": ("Function of the relay RA / RB / RC", 0, "", "8", "8 = fault indication"),
+    "03.04": ("Analog output gain", 0, "%", "100", "analog output not used"),
+    "03.08": ("Cooling fan control", 0, "", "0", "0 = always on, 3 = on when the heat sink is warm"),
+    "03.13": ("Display: status of the relay", 0, "", None, "read only"),
+    "04.02": ("Keypad potentiometer gain", 1, "%", "100.0", ""),
+    "04.04": ("2-wire / 3-wire control mode", 0, "", "0", "0 = 2-wire: MI1 forward / stop, MI2 reverse / stop"),
+    "04.05": ("Function of input MI3", 0, "", "1", "0 = no function, 1 = multi-step speed 1"),
+    "04.06": ("Function of input MI4", 0, "", "2", "0 = no function, 2 = multi-step speed 2"),
+    "04.07": ("Function of input MI5", 0, "", "3", "5 = external reset, 3 = multi-step speed 3"),
+    "04.08": ("Function of input MI6", 0, "", "4", "14 = external fault (E.F.) input, 4 = multi-step speed 4"),
+    "04.10": ("Digital input debouncing time", 0, "x 2 ms", "1", ""),
+    "04.13": ("Maximum AVI voltage", None, "V", "10.00", "analog input not used"),
+    "04.14": ("Maximum AVI frequency", 1, "%", "100.0", "analog input not used"),
+    "04.15": ("Minimum ACI current", 1, "mA", "4.0", "analog input not used"),
+    "04.17": ("Maximum ACI current", 1, "mA", "20.0", "analog input not used"),
+    "04.18": ("Maximum ACI frequency", 1, "%", "100.0", "analog input not used"),
+    "04.19": ("Start / stop control mode (VFD-EL-W)", 0, "", "0", "0 = RUN/STOP by MI1 only; 1 = 2-wire / 3-wire with MI1, MI2, MI3. Must be 1 (MI2 = reverse)"),
+    "04.26": ("Display: status of the MI inputs", 0, "", None, "read only"),
+    "06.00": ("Over-voltage stall prevention", 1, "V", "390.0", ""),
+    "06.01": ("Over-current stall prevention during acceleration", 0, "%", "170", ""),
+    "06.02": ("Over-current stall prevention during operation", 0, "%", "170", ""),
+    "06.04": ("Over-torque detection level", 0, "%", "150", ""),
+    "06.05": ("Over-torque detection time", 1, "s", "0.1", ""),
+    "06.06": ("Electronic thermal overload relay (motor protection)", 0, "", "2", "0 = standard motor, 1 = special motor, 2 = disabled"),
+    "06.07": ("Electronic thermal characteristic", 0, "s", "60", ""),
+    "06.14": ("(not in the VFD-EL manual)", 0, "", None, "EL-W only; compare with the new drive"),
+    "06.15": ("(not in the VFD-EL manual)", 0, "", None, "EL-W only; compare with the new drive"),
+    "06.16": ("(not in the VFD-EL manual)", 0, "", None, "EL-W only; compare with the new drive"),
+    "06.19": ("(not in the VFD-EL manual)", 0, "", None, "EL-W only; compare with the new drive"),
+    "07.00": ("Motor rated current", 1, "A", "= drive rated current (2.5)", ""),
+    "07.01": ("Motor no-load current", 1, "A", "0.4 x rated (1.0)", ""),
+    "07.06": ("Motor rated slip", 2, "Hz", "3.00", ""),
+    "07.07": ("Slip compensation limit", 0, "%", "200", ""),
+    "07.08": ("Torque compensation time constant", 2, "s", "0.30", "compare with the new drive"),
+    "07.09": ("Slip compensation time constant", 2, "s", "0.20", ""),
+    "07.10": ("Accumulated motor run time (minutes)", 0, "min", None, "a counter, not a setting"),
+    "07.13": ("PTC input debouncing time", 0, "x 2 ms", "100", "PTC not used"),
+    "07.14": ("Motor PTC overheat protection level", 1, "V", "2.4", "PTC not used"),
+    "07.15": ("Motor PTC overheat warning level", 1, "V", "1.2", "PTC not used"),
+    "07.16": ("Motor PTC overheat reset delta level", 1, "V", "0.6", "PTC not used"),
+    "08.05": ("Maximum allowable power loss time", 1, "s", "2.0", ""),
+    "08.06": ("Base-block speed search", 0, "", "1", ""),
+    "08.07": ("B.B. time for speed search", 1, "s", "0.5", ""),
+    "08.08": ("Current limit for speed search", 0, "%", "150", ""),
+    "08.16": ("Auto reset time at restart after fault", 1, "s", "60.0", "auto restart itself is off (08.15 = 0)"),
+    "08.24": ("Fire mode frequency", 2, "Hz", "60.00", "fire mode off"),
+    "09.00": ("Communication address", 0, "", "1", ""),
+    "09.01": ("Communication speed", 0, "", "1", "1 = 9600 baud"),
+    "09.02": ("Transmission fault treatment", 0, "", "3", "3 = no warning, keep operating"),
+    "09.07": ("Response delay time", 0, "x 2 ms", "1", ""),
+}
+
+# Group 10 is the PID controller. 10.00 = 0 on the old drive means PID is switched off, so none of group 10 has any effect.
+PID_NOTE = "PID is switched off (10.00 = 0); the values of group 10 have no effect"
+
+
+def keypad_value(number, raw):
+    """Raw integer -> value as shown on the keypad, or None when the scaling is not certain."""
+    info = PARAMS.get(number)
+    if not info or info[1] is None:
+        return None
+    dec = info[1]
+    return str(raw) if dec == 0 else f"{raw / 10 ** dec:.{dec}f}"

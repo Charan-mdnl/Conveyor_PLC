@@ -13,7 +13,7 @@ OUT = sys.argv[1]
 d = Doc()
 d.title("Understand the Conveyor Program",
         "What every part means, why it is there, and how to design it yourself from the problem statement.<br/>"
-        "Companion to \"Write the Conveyor Program Yourself\" (Rev 2). Revision 1, 9 October 2026.")
+        "Companion to \"Write the Conveyor Program Yourself\" (Rev 3). Revision 2, 12 October 2026: checked against the old program exported by TIA Portal itself.")
 
 d.box("<b>How to use this guide.</b> The other guide tells you <b>what to click</b>. This one tells you <b>what it means and why</b>. "
       "Read parts 1 to 5 first (about one hour). Then follow the how-to guide, and each time it says \"create ...\", read the matching part here.<br/>"
@@ -128,18 +128,18 @@ d.table(["Word", "Meaning", "In this project"], [
     ["IEC_TIMER", "The memory a timer needs (start time, preset, elapsed time, output).", "STOP DELAY TIMER, SENSOR CHECK DELAY (old sensor cycle)"],
     ["TCON_IP_v4", "A ready-made group of values that describes one network connection.", "MY CONNECT DATA, used by the Modbus server"],
     ["Tag", "A <b>name</b> for an address, so the program says \"DI_CYCLE START PB\" instead of \"%I0.2\". "
-     "If the wire moves to another input, you change the address once and the whole program follows.", "Default tag table: 19 own tags + 5 system tags"],
+     "If the wire moves to another input, you change the address once and the whole program follows.", "Three tag tables: DI (14), DO (10), Default (7 flags + system and clock tags)"],
     ["PLC tag / HMI tag", "PLC tags live in the PLC. HMI tags live in the panel and are linked to a PLC tag or address. "
-     "The panel can only show or change PLC values through its HMI tags.", "12 HMI tags (how-to 10.2)"],
+     "The panel can only show or change PLC values through its HMI tags.", "15 HMI tags in 3 tables: Default, IO, ALARMS (how-to 10.2)"],
     ["Flag (M bit)", "A Bool in the PLC memory with no wire. Used to pass a decision from one block to another.", "M2.0 ... M2.6"],
     ["System memory byte", "A byte that the CPU fills by itself with useful bits: FirstScan (1 only in the first scan), "
-     "AlwaysTRUE (always 1), AlwaysFALSE (always 0).", "Set to MB1: AlwaysTRUE = M1.2, AlwaysFALSE = M1.3"],
+     "AlwaysTRUE (always 1), AlwaysFALSE (always 0).", "System byte at MB1: AlwaysTRUE = M1.2, AlwaysFALSE = M1.3. Clock byte also ON at MB0 (Clock_10Hz ... Clock_0.5Hz)"],
     ["Data block (DB)", "A named table of values in the PLC memory. Like a page in a notebook where a block keeps its data.", "DB1, DB2, DB3, DB5, DB12 (yours) + DB4 (automatic)"],
     ["Global DB", "A DB that every block may read and write.", "All five that you create"],
     ["Instance DB", "A DB that belongs to one call of a function block (FB) and holds its private memory. TIA creates it.", "MB_SERVER_DB (DB4)"],
     ["Offset", "Where a value sits inside a DB, in byte.bit. 3.0 = byte 3, bit 0.", "DATA1 at 0.0, DATA2 at 2.0 ..."],
     ["Optimized block access", "If ticked, TIA arranges the DB for speed and the values get <b>no fixed offset</b>. "
-     "Then you cannot use addresses like DB2.DBW0 and the Modbus server cannot point into the DB.", "Unticked on all DBs, on purpose"],
+     "Then you cannot use addresses like DB2.DBW0 and the Modbus server cannot point into the DB.", "Unticked on DB_HMI, DB_ALARMS, DB_AUTO, DB_CAMERA; DB_TCP_IP stays optimized"],
     ["Start value", "The value a DB entry has after the program is downloaded (and, if not retained, after power-on).", "All 0. So DATA1 = 0 (run allowed) after power-on"],
 ], [30, 92, 52])
 d.h2("3.4 Program blocks")
@@ -235,7 +235,7 @@ d.table(["#", "Result", "is ON when ...", "Network"], [
     ["R1", "Control ON", "the Emergency button is not pressed", "FC_GENERAL 1"],
     ["R2", "Manual mode / Auto mode", "selector OFF / selector ON", "FC_GENERAL 2"],
     ["R3", "Auto cycle ACTIVE", "control ON <b>and</b> AUTO <b>and</b> no fault <b>and</b> STOP not pressed <b>and</b> (START pressed <b>or</b> already ACTIVE)", "FC_AUTO 1"],
-    ["R4", "Auto wants the belt to run", "ACTIVE <b>and</b> the PC value DATA1 = 0", "FC_AUTO 2"],
+    ["R4", "Auto wants the belt to run", "ACTIVE <b>and</b> the PC value DATA1 = 0", "FC_AUTO 3 (row 1)"],
     ["R5", "Manual forward", "control ON <b>and</b> MANUAL <b>and</b> no fault <b>and</b> (HMI FWD jog held <b>or</b> START held)", "FC_MANUAL 1"],
     ["R6", "Manual reverse", "control ON <b>and</b> MANUAL <b>and</b> no fault <b>and</b> HMI REV jog held", "FC_MANUAL 1"],
     ["R7", "Emergency alarm", "<b>set</b> when Emergency is pressed; stays until reset", "FC_ALARMS 1"],
@@ -295,10 +295,12 @@ d.p("Every rule from step 4 becomes at least one test: \"do this, you must see t
 
 # ------------------------------------------------------------------ 6
 d.h1("6. Why these tags, and why this many")
-d.p("The tag table has <b>19 own tags</b>. The number is not chosen; it follows from the steps above:")
+d.p("The old project has <b>three tag tables</b> with <b>31 own tags</b>. The number is not chosen; it follows from the steps above:")
 d.bullets([
-    "<b>6 inputs</b> (I0.0 - I0.5): one per wire in the I/O list, plus I0.0 for the sensor that is now on the camera.",
-    "<b>6 outputs</b> (Q0.0 - Q0.5): one per wire.",
+    "<b>DI table, 14 tags:</b> 6 used inputs (I0.0 - I0.5: one per wire in the I/O list, plus I0.0 for the sensor that is now on the camera) "
+    "and 8 spares (DI_SPARE I0.6 ... DI_SPARE I1.5). The CPU has 14 inputs, so every input has a name.",
+    "<b>DO table, 10 tags:</b> 6 used outputs (Q0.0 - Q0.5) and 4 spares (DO_SPARE Q0.6 ... DO_SPARE Q1.1): every one of the 10 outputs has a name.",
+    "Naming every spare is a good habit: when a new wire is added later, you only rename the tag (part 12 of the how-to guide does exactly that with I0.7).",
     "<b>7 flags</b> (M2.0 - M2.6): one for each decision that is made in one block and used in another. A flag is how blocks talk to each other."])
 d.table(["Flag", "Written by (one place)", "Read by", "Why it is a flag"], [
     ["M2.0 CONTROL ON FLAG", "FC_GENERAL network 1", "FC_MANUAL, FC_AUTO", "\"Emergency is healthy\" is needed in both modes: decide once, use twice."],
@@ -309,8 +311,8 @@ d.table(["Flag", "Written by (one place)", "Read by", "Why it is a flag"], [
     ["M2.5 MANUAL CONVEYOR FWD ON FLAG", "FC_MANUAL", "FC_OUTPUTS network 1", "Manual's wish; FC_OUTPUTS combines it with auto's wish."],
     ["M2.6 MANUAL CONVEYOR REV ON FLAG", "FC_MANUAL", "FC_OUTPUTS network 2", "Same, for reverse."],
 ], [44, 34, 42, 54])
-d.box("<b>Why start at M2.0, not M0.0?</b> MB1 is taken by the system memory byte (M1.0 - M1.3). M0 is left free, a common habit because M0 is often used "
-      "for the clock memory byte. Starting at M2 keeps away from both. Any free byte would work; what matters is that nothing else uses it.", OKC)
+d.box("<b>Why start at M2.0, not M0.0?</b> MB0 is the clock memory byte (switched on in the old project, M0.0 - M0.7) and MB1 the system memory byte "
+      "(M1.0 - M1.3). So the first free byte is MB2. Any free byte would work; what matters is that nothing else uses it.", OKC)
 d.p("<b>System tags</b> (created by the CPU because the system memory byte is switched on at MB1): FirstScan M1.0, DiagStatusUpdate M1.1, "
     "<b>AlwaysTRUE M1.2</b> and <b>AlwaysFALSE M1.3</b>. The program uses the last two: AlwaysTRUE as a contact that always passes "
     "(to give a network a starting contact), AlwaysFALSE as a fixed 0 for the Modbus DISCONNECT pin.")
@@ -331,7 +333,7 @@ d.table(["DB", "Subject", "Why it exists", "Why this size"], [
     ["DB_CAMERA (DB5)", "Data shared with the PC", "The Modbus server needs one block of Int values with fixed offsets: these are the PC's \"registers\".",
      "19 Ints, but the server shows only the first 10 to the PC (DATA1 - DATA10 = 40001 - 40010), and only DATA1 is used. "
      "The extra rows are spare room; there is no technical reason for 19."],
-    ["DB_TCP_IP (DB12)", "The Modbus connection", "Connection settings (TCON_IP_v4) and fault-finding counters.",
+    ["DB_TCP_IP (DB12)", "The Modbus connection", "Connection settings (TCON_IP_v4) and fault-finding counters. The only <b>optimized</b> DB: it is used only by name.",
      "Settings + 3 counters. The number 12 is the author's choice; any free number works."],
 ], [26, 26, 66, 56])
 d.h2("7.1 Why the DB numbers matter")
@@ -343,9 +345,10 @@ d.p("In a non-optimized DB, Bools are packed bit by bit, but any value bigger th
     "In DB_HMI the three buttons use byte 0 (0.0, 0.1, 0.2), so STOP TIME (DInt, 4 bytes) starts at 2.0 and fills bytes 2 - 5, and CAMERA DONE lands on 6.0. "
     "In DB_AUTO a timer (IEC_TIMER) uses 16 bytes: 4.0 to 19.x, so the next one starts at 20.0. "
     "You do not type offsets; TIA calculates them when you compile. Comparing them with the guide is a quick check that you typed every row and type correctly.")
-d.h2("7.3 Why \"Optimized block access\" is switched off")
+d.h2("7.3 Why \"Optimized block access\" is switched off on four DBs")
 d.p("With optimized access a DB has no fixed layout, so addresses like DB2.DBW0 do not exist and the Modbus server cannot be pointed at DB5. "
-    "This program needs both, so all its DBs are non-optimized. (Optimized is faster and the TIA default; it is fine for DBs that are only used by name.)")
+    "DB_ALARMS and DB_CAMERA need fixed addresses, and the author also made DB_HMI and DB_AUTO non-optimized (the HMI and the old sensor cycle used them). "
+    "<b>DB_TCP_IP stays optimized</b>: nothing reaches it by address, only by name. Optimized is faster and is the TIA default.")
 
 # ------------------------------------------------------------------ 8
 d.h1("8. Why six blocks, and why this order in OB1")
@@ -379,14 +382,15 @@ d.rung("Network 3: \"Is reset requested?\"", [[NO("\"DB_HMI\".\nFAULT RESET PB")
 
 d.h2("FC_MANUAL (FC2): jogging")
 d.rung("Network 1: \"Should the belt jog, and which way?\"", [
-    [NO("CONTROL ON\nFLAG"), NO("MANUAL MODE\nSELECTED"), NC("FAULT BIT"), NO("\"DB_HMI\".MOTOR\nJOG FWD PB"), COIL("MANUAL CONVEYOR\nFWD ON FLAG")],
-    [None, None, None, NO("DI_CYCLE\nSTART PB"), None],
-    [None, None, None, NO("\"DB_HMI\".MOTOR\nJOG REV PB"), COIL("MANUAL CONVEYOR\nREV ON FLAG")]],
-    links=[(3, 0, 2), (4, 0, 1)],
+    [NO("CONTROL ON\nFLAG"), NO("MANUAL MODE\nSELECTED"), NC("FAULT BIT"), NO("\"DB_HMI\".MOTOR\nJOG REV PB"), "-", COIL("MANUAL CONVEYOR\nREV ON FLAG")],
+    [None, None, None, NO("\"DB_HMI\".MOTOR\nJOG FWD PB"), "-", COIL("MANUAL CONVEYOR\nFWD ON FLAG")],
+    [None, None, None, NO("DI_CYCLE\nSTART PB"), None, None]],
+    links=[(3, 0, 2), (4, 1, 2)],
     explain="CONTROL ON: no jogging during Emergency. MANUAL: jogging must not work in AUTO. FAULT BIT (NC): no jogging with an alarm. "
             "Then the button decides the direction. There is <b>no latch</b>: plain coils, so the belt moves only while a button is held (that is what \"jog\" means).")
 d.box("<b>Something the old program does not do:</b> there is no interlock between forward and reverse. Holding the green START and the HMI REV JOG together "
-      "turns on both Q0.0 and Q0.1. Many drives stop when they get both commands, but do not rely on it. Exercise 3 (part 13) shows how to add the interlock in a practice copy.", CHK)
+      "turns on both Q0.0 and Q0.1. Many drives stop when they get both commands, but do not rely on it. Exercise 3 (part 13) shows how to add the interlock in a practice copy. "
+      "The <b>red STOP button has no job in MANUAL</b> in the old program; the red-button reverse jog you asked for is part 12 of the how-to guide.", CHK)
 
 d.h2("FC_ALARMS (FC3): faults")
 d.rung("Network 1: \"Was Emergency pressed?\"", [[NC("DI_EMERGENCY PB"), "-", SET("\"DB_ALARMS\".EMERGENCY\nPB PRESSED FAULT")]], ncols=3,
@@ -425,15 +429,22 @@ d.table(["Contact", "Without it ..."], [
     ["START with ACTIVE in parallel", "This is the latch. Without the ACTIVE branch, the cycle would end when you let go of START."],
     ["DI_CYCLE STOP PB (NO symbol, NC button)", "STOP would do nothing. Because it is in series after the latch, pressing STOP breaks the latch."],
 ], [60, 114])
-d.rung("Network 2: \"Should the belt run now?\"", [
-    [NO("\"DB_AUTO\".\nACTIVE"), BOX("", ["CMP ==", "Int", "IN1 = \"DB_CAMERA\".DATA1", "IN2 = 0"]), "-", COIL("\"DB_AUTO\".\nCONVEYOR ON")]], ncols=4,
-    explain="Two conditions: the operator started the cycle, and the PC allows running. Note the split of responsibility: "
+d.p("The old FC_AUTO has six networks. Only networks 1, 3 (first row) and 6 do work on your machine; the rest is the old sensor cycle, switched off (how-to guide, Appendix A).")
+d.rung("Network 3, first row: \"Should the belt run now?\"", [
+    [NO("AlwaysTRUE"), NO("\"DB_AUTO\".\nACTIVE"), NC("\"DB_AUTO\".\nCONVEYOR OFF2"), BOX("", ["CMP ==  Int", "IN1:", "\"DB_CAMERA\".DATA1", "IN2: 0"]), "-", COIL("\"DB_AUTO\".\nCONVEYOR ON")],
+    [None, None, NO("AlwaysTRUE"), None, None, None]], links=[(2, 0, 1), (3, 0, 1)], ncols=6,
+    explain="Two real conditions: the operator started the cycle (ACTIVE), and the PC allows running (DATA1 = 0). The NOT OFF2 contact belonged to the old cycle; "
+            "the AlwaysTRUE in parallel makes it pass always. Note the split of responsibility: "
             "ACTIVE (green lamp) stays ON when the PC stops the belt, so the operator sees \"cycle started, belt held by the PC\".")
-d.rung("Network 3: \"What should the HMI say?\"", [
-    [NO("AlwaysTRUE"), NO("\"DB_AUTO\".\nACTIVE"), BOX("", ["MOVE", "IN = 10", "OUT1 = \"DB_AUTO\".", "\"AUTO STATUS\""])],
-    [None, NC("\"DB_AUTO\".\nACTIVE"), BOX("", ["MOVE", "IN = 20", "OUT1 = \"DB_AUTO\".", "\"AUTO STATUS\""])]], links=[(1, 0, 1)],
-    explain="The PLC sends a <b>number</b>, the HMI turns it into text with the text list AUTO_STATUS (10 = AUTO RUNNING, 20 = STOPPED). "
-            "Numbers are small and fast to send, and texts can be changed on the HMI without touching the PLC.")
+d.rung("Network 6: \"What should the HMI say?\"", [
+    [NO("AlwaysTRUE"), NO("\"DB_AUTO\".\nACTIVE"), NC("\"DB_AUTO\".\nCONVEYOR OFF2"), BOX("", ["MOVE", "IN = 10", "OUT1 = \"DB_AUTO\".", "\"AUTO STATUS\""])],
+    [None, NC("\"DB_AUTO\".\nACTIVE"), "-", BOX("", ["MOVE", "IN = 20", "OUT1 = \"DB_AUTO\".", "\"AUTO STATUS\""])],
+    [None, NO("\"DB_AUTO\".\nACTIVE"), NO("\"DB_AUTO\".\nCONVEYOR OFF2"), BOX("", ["MOVE", "IN = 30", "OUT1 = \"DB_AUTO\".", "\"AUTO STATUS\""])]],
+    links=[(1, 0, 2)], ncols=4,
+    explain="The PLC sends a <b>number</b>, the HMI turns it into text with the text list AUTO_STATUS (10 = AUTO RUNNING, 20 = STOPPED, 30 = WAITING FOR CAMERA ACK, "
+            "which never happens now). Numbers are small and fast to send, and texts can be changed on the HMI without touching the PLC.")
+d.p("Networks 2, 4, 5 and the lower rows of network 3 are the switched-off sensor cycle: a stop-delay timer, a sensor timer, an edge on I0.0, and the OFF1 / OFF2 memories. "
+    "A <b>normally closed AlwaysTRUE</b> contact at the start of that part means it can never run.")
 
 d.h2("FC_TCP_IP (FC6): the Modbus server")
 d.bullets([
@@ -448,13 +459,13 @@ d.p("These four stories show how the blocks work together. Try each one on the r
 d.h2("Story 1: AUTO, operator presses START")
 d.steps([
     "I0.2 becomes 1. In the next scan FC_AUTO network 1 sees START, together with control ON, AUTO and no fault: <b>ACTIVE = 1</b>. The ACTIVE branch now holds it.",
-    "FC_AUTO network 2: ACTIVE = 1 and DATA1 = 0 (start value): <b>CONVEYOR ON = 1</b>. Network 3 writes 10 to AUTO STATUS.",
+    "FC_AUTO network 3: ACTIVE = 1 and DATA1 = 0 (start value): <b>CONVEYOR ON = 1</b>. Network 6 writes 10 to AUTO STATUS.",
     "FC_OUTPUTS: CONVEYOR ON gives <b>Q0.0 = 1</b> (VFD runs forward). ACTIVE gives <b>Q0.3 = 1</b> (green lamp).",
     "The HMI reads AUTO STATUS = 10 and shows AUTO RUNNING. The operator releases START: nothing changes, the latch holds."])
 d.h2("Story 2: the PC finds a wrong count")
 d.steps([
     "The PC program sends Modbus \"write single register\", address 0, value 1. MB_SERVER writes 1 into DB5.DBW0 = DATA1.",
-    "FC_AUTO network 2: DATA1 is no longer 0, so CONVEYOR ON = 0. FC_OUTPUTS: <b>Q0.0 = 0</b>, the belt stops.",
+    "FC_AUTO network 3: DATA1 is no longer 0, so CONVEYOR ON = 0. FC_OUTPUTS: <b>Q0.0 = 0</b>, the belt stops.",
     "ACTIVE is still 1: green lamp stays on, HMI still says AUTO RUNNING.",
     "The operator fixes the stack and presses Start (or Rescan) on the PC. The PC writes 0, and the belt runs again."])
 d.h2("Story 3: Emergency pressed, then reset")
@@ -466,9 +477,9 @@ d.steps([
     "The cycle does <b>not</b> restart by itself: ACTIVE was broken. The operator must press START again. This is intentional: a machine must not start on its own after a fault."])
 d.h2("Story 4: MANUAL, operator holds CONVEYOR REV JOG on the HMI")
 d.steps([
-    "The HMI button event \"Press\" runs SetBit: DB1.DBX0.2 (MOTOR JOG REV PB) = 1.",
+    "The HMI button event \"Press\" runs SetBitWhileKeyPressed: DB1.DBX0.2 (MOTOR JOG REV PB) = 1, and the button turns green.",
     "FC_MANUAL: control ON, MANUAL, no fault, REV jog: <b>REV flag = 1</b>. FC_OUTPUTS: <b>Q0.1 = 1</b>, the belt runs backward.",
-    "Operator lifts the finger: event \"Release\" runs ResetBit: the bit is 0 again, Q0.1 = 0, the belt stops."])
+    "Operator lifts the finger: SetBitWhileKeyPressed clears the bit again, Q0.1 = 0, the belt stops."])
 
 # ------------------------------------------------------------------ 11
 d.h1("11. Modbus TCP, the PC-to-PLC conversation")
@@ -489,17 +500,22 @@ d.p("<b>When the PC writes:</b> 0 or 1 when the operator presses Start / Stop in
 
 # ------------------------------------------------------------------ 12
 d.h1("12. The HMI, explained")
+d.p("Checked against the HMI exported by TIA Portal on 12 October 2026.")
 d.bullets([
-    "<b>HMI tags</b> are the panel's only window into the PLC. Twelve are enough because each screen element needs only one value.",
-    "<b>Template:</b> the title bar, mode line and the five buttons are the same on every screen, so they are drawn once on Template_1. "
+    "<b>HMI tags</b> are the panel's only window into the PLC. There are 15, in three tables: <b>Default</b> (buttons, mode, status, alarm pop-ups, "
+    "plus two tags of the old sensor cycle and the internal Tag_ScreenNumber), <b>IO</b> (IB0, IB1, QB0, QB1) and <b>ALARMS</b> (ALARM WORD). "
+    "Each screen element needs only one value.",
+    "<b>Template MAIN:</b> the title bar, mode line and the five buttons are the same on every screen, so they are drawn once on the template. "
     "Change the template and every screen follows.",
-    "<b>Buttons use SetBit on Press and ResetBit on Release.</b> This makes the HMI button behave like a real push button: 1 only while touched. "
-    "That is exactly what jog and reset need.",
-    "<b>I/O status screens read whole bytes</b> (IB0, IB1, QB0, QB1), and each lamp looks at one bit of its byte. Four tags show 24 signals.",
-    "<b>Text lists</b> turn numbers into words: AUTO STATUS 10 / 20 / 30, mode 0 / 1.",
+    "<b>Buttons use SetBitWhileKeyPressed on Press.</b> The bit is 1 only while the finger is on the button, like a real push button. "
+    "That is exactly what jog and reset need. The jog buttons also turn <b>green</b> while pressed (an appearance animation on the same tag).",
+    "<b>I/O status screens read whole bytes</b> (IB0, IB1, QB0, QB1), and each lamp looks at one bit of its byte: <b>red = OFF, green = ON</b>. Four tags show 24 signals.",
+    "<b>Text lists</b> turn numbers into words: AUTO STATUS 10 / 20 / 30, MODE 0 / 1. The AUTO status field also changes colour: <b>green</b> at 10 (AUTO RUNNING), <b>red</b> at 20 (STOPPED).",
     "<b>Discrete alarms</b> watch one bit each in ALARM WORD. Bits 8 and 9, not 0 and 1, because in a Siemens word the first byte (DBB0) is the <b>high</b> half: "
-    "DBX0.0 is bit 8 of DBW0 and DBX0.1 is bit 9.",
-    "<b>Acquisition mode \"Cyclic continuous\"</b> for ALARM WORD: the panel keeps reading it even when no screen shows it, so alarms appear on any screen."])
+    "DBX0.0 is bit 8 of DBW0 and DBX0.1 is bit 9. (The export cannot include alarms; these come from older files of the project.)",
+    "<b>Acquisition mode \"Cyclic continuous\"</b> for ALARM WORD: the panel keeps reading it even when no screen shows it, so alarms appear on any screen. "
+    "All other tags use \"Cyclic in operation\": read only while a screen shows them.",
+    "<b>One mistake in the old HMI:</b> the BACK button on OUTPUT STATUS opens OUTPUT STATUS itself, so it does nothing. The how-to guide (10.5) shows the fix."])
 
 # ------------------------------------------------------------------ 13
 d.h1("13. Practise: three small exercises")
@@ -508,16 +524,16 @@ d.box("<b>Do these only in a COPY of your project</b> (Project &gt; Save as ... 
 d.h2("Exercise 1. Show the Modbus message counter on the HMI")
 d.steps([
     "HMI tags: add <b>MODBUS DONE</b>, PLC tag \"DB_TCP_IP\".\"NO OF DONE\" (data type UDInt).",
-    "AUTO OPERATION screen: add a text field \"PC MESSAGES\" and an I/O field next to it, mode <b>Output</b>, tag MODBUS DONE.",
+    "AUTO screen: add a text field \"PC MESSAGES\" and an I/O field next to it, mode <b>Output</b>, tag MODBUS DONE.",
     "Compile, load, and watch the number count up each time the PC sends Start or Stop."])
 d.p("<i>You learn:</i> how a PLC value reaches the panel (DB value, HMI tag, field).")
 d.h2("Exercise 2. Make the amber lamp blink in MANUAL")
 d.steps([
-    "PLC properties &gt; <b>System and clock memory</b>: tick <b>Enable the use of clock memory byte</b>, address <b>0</b>. "
-    "New tags appear, for example <b>Clock_1Hz = M0.5</b> (1 on, 1 off, once per second).",
+    "The clock memory byte is already switched on at address <b>0</b> in this project (PLC properties &gt; <b>System and clock memory</b>). "
+    "It gives tags such as <b>Clock_1Hz = M0.5</b> (1 on, 1 off, once per second).",
     "FC_OUTPUTS network 6: put a normally open contact <b>Clock_1Hz</b> in series after MANUAL MODE SELECTED.",
     "Compile and test: in MANUAL the amber lamp now blinks."])
-d.p("<i>You learn:</i> system and clock memory, and why the old program left M0 free (part 6).")
+d.p("<i>You learn:</i> clock memory, which the old project switched on but never used (part 6).")
 d.h2("Exercise 3. Add a forward / reverse interlock")
 d.steps([
     "FC_OUTPUTS network 1: add a <b>normally closed</b> contact <b>DO_CONVEYOR REV ON</b> just before the coil DO_CONVEYOR FWD ON.",
@@ -539,7 +555,7 @@ d.table(["Question", "Answer"], [
 # ------------------------------------------------------------------ 14
 d.h1("14. Honest notes: fact, inference and limits")
 d.table(["Statement", "Source"], [
-    ["Tag names, addresses, DB layouts, networks, the OB1 order", "Read from the old project file (fact)"],
+    ["Tag names, addresses, DB layouts, networks, the OB1 order", "Exported from the old project by TIA Portal itself on 12 Oct 2026 (fact)"],
     ["How the machine is operated (AUTO / MANUAL, PC stops the belt)", "Your explanation of 6 Oct 2026, matches the program and the PC code"],
     ["When the PC writes 0 / 1 to 40001", "Read from the PC program (Frontend/backend/server.py)"],
     ["VFD relay = fault (03.00 = 8)", "Read from the old drive on 7 Oct 2026; meaning of 8 to be confirmed in the Delta manual"],
@@ -552,5 +568,5 @@ d.bullets([
     "the old PLC holds a newer program: upload it from the PLC instead of guessing.",
     "Q0.2 (reset to the VFD): check on the old panel whether a wire goes from Q0.2 to a VFD input."])
 
-d.build(OUT, "Understand the Conveyor Program - companion guide, revision 1", "Understand the Conveyor Program (Rev 1)")
+d.build(OUT, "Understand the Conveyor Program - companion guide, revision 2", "Understand the Conveyor Program (Rev 2)")
 print("ok", OUT)

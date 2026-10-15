@@ -1,0 +1,281 @@
+
+================ Tag table: DI ================
+    DI_PRODUCT SENSOR                Bool     %I0.0
+    DI_AUTO MANUAL SELECTION         Bool     %I0.1
+    DI_CYCLE START PB                Bool     %I0.2
+    DI_CYCLE STOP PB                 Bool     %I0.3
+    DI_EMERGENCY PB                  Bool     %I0.4
+    DI_CONVEYOR VFD FAULT            Bool     %I0.5
+    DI_SPARE I0.6                    Bool     %I0.6
+    DI_SPARE I0.7                    Bool     %I0.7
+    DI_SPARE I1.0                    Bool     %I1.0
+    DI_SPARE I1.1                    Bool     %I1.1
+    DI_SPARE I1.2                    Bool     %I1.2
+    DI_SPARE I1.3                    Bool     %I1.3
+    DI_SPARE I1.4                    Bool     %I1.4
+    DI_SPARE I1.5                    Bool     %I1.5
+
+================ Tag table: DO ================
+    DO_CONVEYOR FWD ON               Bool     %Q0.0
+    DO_CONVEYOR REV ON               Bool     %Q0.1
+    DO_FAULT RESET                   Bool     %Q0.2
+    DO_TL GREEN                      Bool     %Q0.3
+    DO_TL RED                        Bool     %Q0.4
+    DO_TL AMBER                      Bool     %Q0.5
+    DO_SPARE Q0.6                    Bool     %Q0.6
+    DO_SPARE Q0.7                    Bool     %Q0.7
+    DO_SPARE Q1.0                    Bool     %Q1.0
+    DO_SPARE Q1.1                    Bool     %Q1.1
+
+================ Tag table: Default tag table ================
+    System_Byte                      Byte     %MB1
+    FirstScan                        Bool     %M1.0
+    DiagStatusUpdate                 Bool     %M1.1
+    AlwaysTRUE                       Bool     %M1.2
+    AlwaysFALSE                      Bool     %M1.3
+    Clock_Byte                       Byte     %MB0
+    Clock_10Hz                       Bool     %M0.0
+    Clock_5Hz                        Bool     %M0.1
+    Clock_2.5Hz                      Bool     %M0.2
+    Clock_2Hz                        Bool     %M0.3
+    Clock_1.25Hz                     Bool     %M0.4
+    Clock_1Hz                        Bool     %M0.5
+    Clock_0.625Hz                    Bool     %M0.6
+    Clock_0.5Hz                      Bool     %M0.7
+    CONTROL ON FLAG                  Bool     %M2.0
+    MANUAL MODE SELECTED             Bool     %M2.1
+    AUTO MODE SELECTED               Bool     %M2.2
+    FAULT RESET FLAG                 Bool     %M2.3
+    FAULT BIT                        Bool     %M2.4
+    MANUAL CONVEYOR FWD ON FLAG      Bool     %M2.5
+    MANUAL CONVEYOR REV ON FLAG      Bool     %M2.6
+
+================ Main  (OB 1) ================
+Block title: "Main Program Sweep (Cycle)"
+
+--- Network 1: (no title)   [LAD]
+    CALL FC_AUTO   when TRUE
+
+--- Network 2: (no title)   [LAD]
+    CALL FC_ALARMS   when TRUE
+
+--- Network 3: (no title)   [LAD]
+    CALL FC_GENERAL   when TRUE
+
+--- Network 4: (no title)   [LAD]
+    CALL FC_MANUAL   when TRUE
+
+--- Network 5: (no title)   [LAD]
+    CALL FC_OUTPUTS   when TRUE
+
+--- Network 6: (no title)   [LAD]
+    CALL FC_TCP_IP   when TRUE
+
+--- Network 7: (no title)   [LAD]
+    (empty network)
+
+================ FC_GENERAL  (FC 1) ================
+Block title: CONTROL ON
+
+--- Network 1: CONTROL ON   [LAD]
+    "CONTROL ON FLAG" := "DI_EMERGENCY PB"
+
+--- Network 2: MODE SELECTION   [LAD]
+    "MANUAL MODE SELECTED" := "AlwaysTRUE" AND NOT "DI_AUTO MANUAL SELECTION"
+    "AUTO MODE SELECTED" := "AlwaysTRUE" AND "DI_AUTO MANUAL SELECTION"
+
+--- Network 3: FAULT RESET   [LAD]
+    "FAULT RESET FLAG" := "DB_HMI"."FAULT RESET PB"
+
+--- Network 4: (no title)   [LAD]
+    (empty network)
+
+================ FC_MANUAL  (FC 2) ================
+Block title: MOTOR FWD /REV ON
+
+--- Network 1: MOTOR FWD /REV ON   [LAD]
+    "MANUAL CONVEYOR REV ON FLAG" := "CONTROL ON FLAG" AND "MANUAL MODE SELECTED" AND NOT "FAULT BIT" AND "DB_HMI"."MOTOR JOG REV PB"
+    "MANUAL CONVEYOR FWD ON FLAG" := ("CONTROL ON FLAG" AND "MANUAL MODE SELECTED" AND NOT "FAULT BIT" AND "DB_HMI"."MOTOR JOG FWD PB" OR "CONTROL ON FLAG" AND "MANUAL MODE SELECTED" AND NOT "FAULT BIT" AND "DI_CYCLE START PB")
+
+--- Network 2: (no title)   [LAD]
+    (empty network)
+
+================ FC_ALARMS  (FC 3) ================
+Block title: EMERGENCY PB PRESSED FAULT (I0.4)
+
+--- Network 1: EMERGENCY PB PRESSED FAULT (I0.4)   [LAD]
+    SET   "DB_ALARMS"."EMERGENCY PB PRESSED FAULT"   when NOT "DI_EMERGENCY PB"
+
+--- Network 2: CONVEYOR VFD FAULT (I0.5)   [LAD]
+    SET   "DB_ALARMS"."VFD FAULT"   when "DI_CONVEYOR VFD FAULT"
+
+--- Network 3: FAULT RESET   [LAD]
+    MOVE 0 -> %DB2.DBW0   when "FAULT RESET FLAG"
+
+--- Network 4: FAULT BIT   [LAD]
+    "FAULT BIT" := [0 <> %DB2.DBW0 (Word)]
+    "DB_ALARMS"."FAULT POP" := [0 <> %DB2.DBW0 (Word)]
+
+--- Network 5: (no title)   [LAD]
+    (empty network)
+
+================ FC_OUTPUTS  (FC 4) ================
+Block title: CONVEYOR FWD ON
+
+--- Network 1: CONVEYOR FWD ON   [LAD]
+    "DO_CONVEYOR FWD ON" := ("MANUAL CONVEYOR FWD ON FLAG" OR "DB_AUTO"."CONVEYOR ON")
+
+--- Network 2: CONVEYOR REV ON   [LAD]
+    "DO_CONVEYOR REV ON" := "MANUAL CONVEYOR REV ON FLAG"
+
+--- Network 3: FAULT RESET   [LAD]
+    "DO_FAULT RESET" := "FAULT RESET FLAG"
+
+--- Network 4: TL GREEN   [LAD]
+    "DO_TL GREEN" := "DB_AUTO".ACTIVE
+
+--- Network 5: TL RED   [LAD]
+    "DO_TL RED" := "FAULT BIT"
+
+--- Network 6: TL AMBER   [LAD]
+    "DO_TL AMBER" := "MANUAL MODE SELECTED"
+
+--- Network 7: (no title)   [LAD]
+    (empty network)
+
+================ FC_AUTO  (FC 5) ================
+Block title: AUTO ON
+
+--- Network 1: AUTO ON   [LAD]
+    "DB_AUTO".ACTIVE := ("CONTROL ON FLAG" AND "AUTO MODE SELECTED" AND NOT "FAULT BIT" AND "DI_CYCLE START PB" OR "CONTROL ON FLAG" AND "AUTO MODE SELECTED" AND NOT "FAULT BIT" AND "DB_AUTO".ACTIVE) AND "DI_CYCLE STOP PB"
+
+--- Network 2: STOP DELAY TIME   [SCL]
+    SCL:  "DB_AUTO"."STOP DELAY TIMER".PT := "DB_HMI"."STOP TIME" * 1000;
+
+--- Network 3: CONVEYOR ON   [LAD]
+    "DB_AUTO"."CONVEYOR ON" := ("AlwaysTRUE" AND "DB_AUTO".ACTIVE AND NOT "DB_AUTO"."CONVEYOR OFF2" OR "AlwaysTRUE" AND "DB_AUTO".ACTIVE AND "AlwaysTRUE") AND ["DB_CAMERA".DATA1 == 0 (Int)]
+    SET   "DB_AUTO"."CONVEYOR OFF1"   when RISING_EDGE("AlwaysTRUE" AND NOT "AlwaysTRUE" AND "DB_AUTO".ACTIVE AND "DB_AUTO"."CONVEYOR ON" AND "DB_AUTO"."SENSOR CHECK DELAY".Q AND "DI_PRODUCT SENSOR", memory "DB_AUTO".P_TRG)
+    TON "DB_AUTO"."SENSOR CHECK DELAY": IN = "AlwaysTRUE" AND NOT "AlwaysTRUE" AND "DB_AUTO".ACTIVE AND "DB_AUTO"."CONVEYOR ON", PT = T#500MS
+    TON "DB_AUTO"."STOP DELAY TIMER": IN = "AlwaysTRUE" AND "DB_AUTO"."CONVEYOR OFF1", PT = "DB_AUTO"."STOP DELAY TIMER".PT
+    RESET "DB_AUTO"."CONVEYOR OFF1"   when "AlwaysTRUE" AND "DB_AUTO"."STOP DELAY TIMER".Q
+    MOVE 1 -> "DB_CAMERA".DATA1   when "AlwaysTRUE" AND "DB_AUTO"."STOP DELAY TIMER".Q
+    SET   "DB_AUTO"."CONVEYOR OFF2"   when "AlwaysTRUE" AND "DB_AUTO"."STOP DELAY TIMER".Q
+
+--- Network 4: CAMERA DONE   [LAD]
+    "DB_AUTO"."CAMERA DONE" := "DB_AUTO"."CONVEYOR OFF2" AND ["DB_CAMERA".DATA1 == 0 (Int)]
+
+--- Network 5: CONVEYOR OFF RESET   [LAD]
+    RESET "DB_AUTO"."CONVEYOR OFF1"   when ("AlwaysTRUE" AND "DB_AUTO"."CONVEYOR OFF2" AND "DB_AUTO"."CAMERA DONE" OR "AlwaysTRUE" AND "DB_AUTO"."CONVEYOR OFF2" AND "DB_HMI"."CAMERA DONE" OR "AlwaysTRUE" AND NOT "DB_AUTO".ACTIVE)
+    RESET "DB_AUTO"."CONVEYOR OFF2"   when ("AlwaysTRUE" AND "DB_AUTO"."CONVEYOR OFF2" AND "DB_AUTO"."CAMERA DONE" OR "AlwaysTRUE" AND "DB_AUTO"."CONVEYOR OFF2" AND "DB_HMI"."CAMERA DONE" OR "AlwaysTRUE" AND NOT "DB_AUTO".ACTIVE)
+
+--- Network 6: AUTO STATUS   [LAD]
+    MOVE 10 -> "DB_AUTO"."AUTO STATUS"   when "AlwaysTRUE" AND "DB_AUTO".ACTIVE AND NOT "DB_AUTO"."CONVEYOR OFF2"
+    MOVE 20 -> "DB_AUTO"."AUTO STATUS"   when "AlwaysTRUE" AND NOT "DB_AUTO".ACTIVE
+    MOVE 30 -> "DB_AUTO"."AUTO STATUS"   when "AlwaysTRUE" AND "DB_AUTO".ACTIVE AND "DB_AUTO"."CONVEYOR OFF2"
+
+--- Network 7: (no title)   [LAD]
+    (empty network)
+
+================ FC_TCP_IP  (FC 6) ================
+Block title: Connection definition
+
+--- Network 1: Connection definition   [LAD]
+    MOVE Local~PROFINET_interface_1 -> "DB_TCP_IP"."MY CONNECT DATA".InterfaceId   when TRUE
+    MOVE 1 -> "DB_TCP_IP"."MY CONNECT DATA".ID   when TRUE
+    MOVE 11 -> "DB_TCP_IP"."MY CONNECT DATA".ConnectionType   when TRUE
+    "DB_TCP_IP"."MY CONNECT DATA".ActiveEstablished := NOT "AlwaysTRUE"
+    MOVE 0 -> "DB_TCP_IP"."MY CONNECT DATA".RemoteAddress.ADDR[1]   when TRUE
+    MOVE 0 -> "DB_TCP_IP"."MY CONNECT DATA".RemoteAddress.ADDR[2]   when TRUE
+    MOVE 0 -> "DB_TCP_IP"."MY CONNECT DATA".RemoteAddress.ADDR[3]   when TRUE
+    MOVE 0 -> "DB_TCP_IP"."MY CONNECT DATA".RemoteAddress.ADDR[4]   when TRUE
+    MOVE 0 -> "DB_TCP_IP"."MY CONNECT DATA".RemotePort   when TRUE
+    MOVE 502 -> "DB_TCP_IP"."MY CONNECT DATA".LocalPort   when TRUE
+
+--- Network 2: MB SERVER   [LAD]
+    MB_SERVER "MB_SERVER_DB" when TRUE: CONNECT = "DB_TCP_IP"."MY CONNECT DATA", DISCONNECT = "AlwaysFALSE", DR = (output) None, ERROR = (output) None, MB_HOLD_REG = P#DB5.DBX0.0 INT 10, NDR = (output) None, STATUS = (output) None
+
+--- Network 3: ERROR CHECK   [LAD]
+    "DB_TCP_IP"."NO OF DONE" := "DB_TCP_IP"."NO OF DONE" + 1   (UDInt) when ("MB_SERVER_DB".NDR OR "MB_SERVER_DB".DR)
+    "DB_TCP_IP"."NO OF ERROR" := "DB_TCP_IP"."NO OF ERROR" + 1   (UDInt) when "MB_SERVER_DB".ERROR
+    MOVE "MB_SERVER_DB".STATUS -> "DB_TCP_IP"."ERROR STATUS"   when "MB_SERVER_DB".ERROR
+
+================ DB_ALARMS  (GlobalDB 2) ================
+    EMERGENCY PB PRESSED FAULT   Bool           start=None
+    VFD FAULT                    Bool           start=None
+    SPARE1                       Bool           start=None
+    SPARE2                       Bool           start=None
+    SPARE3                       Bool           start=None
+    SPARE4                       Bool           start=None
+    SPARE5                       Bool           start=None
+    SPARE6                       Bool           start=None
+    SPARE7                       Bool           start=None
+    SPARE8                       Bool           start=None
+    SPARE9                       Bool           start=None
+    SPARE10                      Bool           start=None
+    SPARE11                      Bool           start=None
+    SPARE12                      Bool           start=None
+    SPARE13                      Bool           start=None
+    SPARE14                      Bool           start=None
+    FAULT POP                    Bool           start=None
+    WARNING POP                  Bool           start=None
+
+================ DB_AUTO  (GlobalDB 3) ================
+    ACTIVE                       Bool           start=None
+    CONVEYOR ON                  Bool           start=None
+    CONVEYOR OFF1                Bool           start=None
+    CONVEYOR OFF2                Bool           start=None
+    P_TRG                        Bool           start=None
+    CAMERA DONE                  Bool           start=None
+    AUTO STATUS                  Int            start=None
+    STOP DELAY TIMER             IEC_TIMER      start=None
+        PT                           Time           start=None
+        ET                           Time           start=None
+        IN                           Bool           start=None
+        Q                            Bool           start=None
+    SENSOR CHECK DELAY           IEC_TIMER      start=None
+        PT                           Time           start=None
+        ET                           Time           start=None
+        IN                           Bool           start=None
+        Q                            Bool           start=None
+
+================ DB_CAMERA  (GlobalDB 5) ================
+    DATA1                        Int            start=None
+    DATA2                        Int            start=None
+    DATA3                        Int            start=None
+    DATA4                        Int            start=None
+    DATA5                        Int            start=None
+    DATA6                        Int            start=None
+    DATA7                        Int            start=None
+    DATA8                        Int            start=None
+    DATA9                        Int            start=None
+    DATA10                       Int            start=None
+    DATA11                       Int            start=None
+    DATA12                       Int            start=None
+    DATA13                       Int            start=None
+    DATA14                       Int            start=None
+    DATA15                       Int            start=None
+    DATA16                       Int            start=None
+    DATA17                       Int            start=None
+    DATA18                       Int            start=None
+    DATA19                       Int            start=None
+
+================ DB_HMI  (GlobalDB 1) ================
+    FAULT RESET PB               Bool           start=None
+    MOTOR JOG FWD PB             Bool           start=None
+    MOTOR JOG REV PB             Bool           start=None
+    STOP TIME                    DInt           start=None
+    CAMERA DONE                  Bool           start=None
+
+================ DB_TCP_IP  (GlobalDB 12) ================
+    MY CONNECT DATA              TCON_IP_v4     start=None
+        InterfaceId                  HW_ANY         start=None
+        ID                           CONN_OUC       start=None
+        ConnectionType               Byte           start=None
+        ActiveEstablished            Bool           start=None
+        RemoteAddress                IP_V4          start=None
+            ADDR                         Array[1..4] of Byte start=None
+        RemotePort                   UInt           start=None
+        LocalPort                    UInt           start=None
+    NO OF DONE                   UDInt          start=None
+    NO OF ERROR                  UDInt          start=None
+    ERROR STATUS                 UDInt          start=None

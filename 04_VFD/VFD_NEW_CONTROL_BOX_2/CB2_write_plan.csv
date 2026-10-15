@@ -1,0 +1,16 @@
+parameter,modbus_address,new_drive_now,write_value,reason
+01.00,0x0100,6000,6410,new motor + gearbox: same belt speed with the knob fully clockwise
+01.01,0x0101,5999,5000,same as the old drive
+01.09,0x0109,100,50,same as the old drive
+01.10,0x010A,100,5,same as the old drive
+01.12,0x010C,100,1,same as the old drive
+01.13,0x010D,10,1,same as the old drive
+02.01,0x0201,0,1,same as the old drive
+02.04,0x0204,1,0,same as the old drive
+02.10,0x020A,1,0,same as the old drive
+02.11,0x020B,2580,5000,same as the old drive
+02.12,0x020C,6000,5000,same as the old drive
+04.06,0x0406,1,0,same as the old drive
+04.07,0x0407,2,5,same as the old drive
+04.08,0x0408,3,14,same as the old drive
+07.00,0x0700,25,16,new motor nameplate current 1.6 A (240 V delta)

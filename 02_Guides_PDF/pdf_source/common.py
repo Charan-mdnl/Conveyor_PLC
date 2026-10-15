@@ -97,7 +97,8 @@ class Doc:
         if status_col is not None:
             for i, row in enumerate(rows, 1):
                 value = str(row[status_col]).upper()
-                color = OKC if value.startswith("OK") else BAD if value.startswith(("MISSING", "NOT")) else CHK
+                color = (OKC if value.startswith(("OK", "YES")) else BAD if value.startswith(("MISSING", "NOT"))
+                         else colors.HexColor("#e4e7eb") if value.startswith("NO") else CHK)
                 style.append(("BACKGROUND", (status_col, i), (status_col, i), color))
         table.setStyle(TableStyle(style))
         self.add(table)

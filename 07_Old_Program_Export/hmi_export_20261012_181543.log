@@ -1,0 +1,35 @@
+18:15:43  Starting TIA Portal without user interface ...
+18:15:50  Opening project copy C:\Users\xprobotics\claude_work\old_project_copy\latest plc.ap21
+18:16:09  HMI: HMI_RT_1 in device HMI_1
+18:16:15    exported screen AUTO
+18:16:15    exported screen MANUAL
+18:16:15    exported screen ALARMS
+18:16:16    exported screen INPUT STATUS
+18:16:16    exported screen OUTPUT STATUS
+18:16:16    exported template MAIN
+18:16:18    exported tag table Default tag table
+18:16:18    exported tag table IO
+18:16:18    exported tag table ALARMS
+18:16:19    exported text list AUTO STATUS
+18:16:19    exported text list MODE
+18:16:19    exported cycle 100 ms
+18:16:19    exported cycle 250 ms
+18:16:19    exported cycle 500 ms
+18:16:19    exported cycle 1 s
+18:16:19    exported cycle 2 s
+18:16:19    exported cycle 5 s
+18:16:19    exported cycle 10 s
+18:16:19    exported cycle 1 min
+18:16:19    exported cycle 5 min
+18:16:19    exported cycle 10 min
+18:16:19    exported cycle 1 h
+18:16:19    exported cycle 1 d
+18:16:19    exported cycle UponChange
+18:16:19    exported cycle 125 ms
+18:16:19    exported cycle Default cycle 1
+18:16:19    exported cycle Default cycle 2
+18:16:19    exported cycle Default cycle 3
+18:16:19    exported cycle Default cycle 4
+18:16:19    exported cycle Default cycle 5
+18:16:19  Closing the project WITHOUT saving.
+18:16:20  HMI export finished: C:\Users\xprobotics\claude_work\hmi_export_20261012_181543

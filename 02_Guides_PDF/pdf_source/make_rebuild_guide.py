@@ -17,10 +17,20 @@ PICS = os.path.join(ROOT, "03_Wiring_Photos")
 
 d = Doc()
 d.title("Conveyor + Camera Control Panel",
-        "Rebuild guide, Revision 3 (9 October 2026): panel, PLC, HMI, VFD, camera and PC program.<br/>"
+        "Rebuild guide, Revision 5 (13 October 2026): panel, PLC, HMI, VFD, camera and PC program.<br/>"
         "Based on the old TIA Portal project \"latest plc\", your hand drawings, your BOM, your explanation of how the "
         "machine works, and the PC and camera files in the folder conveyor_automation-main.")
 
+d.box("<b>What changed in Revision 5.</b> The VFD part is rewritten with exact facts in place of \"copy from the old drive\" and \"check\": "
+      "section 7 now says what every important setting of the old drive means (from the Delta VFD-EL manual), which wire goes to which terminal and why, "
+      "the input mode switch (PNP), where the speed comes from (the knob on the drive), and the list of parameters to set. "
+      "New <b>Appendix C</b> lists every non-zero setting of the old drive with its name, value and factory value. "
+      "Sections 2, 3, 4 and 6 are updated to match.", OKC)
+d.box("<b>What changed in Revision 4.</b> On 12 October 2026 the old project (a copy) was opened in TIA Portal and the whole PLC program and HMI were exported "
+      "by TIA itself. The program description in this guide is now checked against that export (Appendix A). Also:<br/>"
+      "1. The red-button reverse in MANUAL is <b>not</b> in the old program; you confirmed it was wanted but never built. It is now a planned new feature "
+      "with one extra wire to spare input I0.7 (sections 2, 3, 4.1, 6.2, 13; how-to guide part 12).<br/>"
+      "2. HMI notes in section 11 (the BACK button on OUTPUT STATUS does nothing in the old project).", OKC)
 d.box("<b>What changed in Revision 3.</b> Section 7 now shows the real values read from the old drive on 7 October 2026 "
       "(motor current 07.00 corrected: the old drive holds 2.5 A, not 1.82 A), and the VFD tool notes say it has been used on the real drive. "
       "Files are now in numbered folders (see README.md in the PLC folder).", OKC)
@@ -93,24 +103,26 @@ d.p("The alarm stays stored. Release the Emergency button (or clear the VFD faul
 # ------------------------------------------------------------------ 2
 d.h1("2. Result of my verification")
 d.table(["Item", "Result", "What it means for you"], [
-    ["Your explanation of how the machine works", "OK, 1 point to check",
-     "It matches the saved PLC program, the PC program and the camera settings. One difference: you say the red button runs "
-     "reverse in manual mode. In the saved PLC program reverse comes only from the HMI button. See section 3, item 1."],
+    ["Your explanation of how the machine works", "OK",
+     "It matches the PLC program (exported by TIA itself on 12 Oct), the PC program and the camera settings. The red button reversing in manual mode "
+     "is not in the program: you confirmed it was wanted but never built. It is now a new feature (section 6.2, how-to guide part 12)."],
     ["PLC and HMI part numbers in the BOM", "OK",
      "Exactly the same as in the old program (CPU 1214C DC/DC/DC 6ES7214-1AG40-0XB0, HMI KTP700 Basic 6AV2123-2GB03-0AX0)."],
     ["Power drawing (page dated 18 Aug)", "OK",
      "Matches the BOM. One wording fix: the \"DC-DC converter\" is really the 230 VAC to 24 VDC power supply."],
     ["PLC I/O drawing (page dated 19 Aug)", "OK",
      "Every signal matches the program. I0.0 with no wire is correct, because the sensor goes to the camera."],
-    ["VFD relay, purple wire, health lamp", "CHECK",
-     "Read from your sketch: RC = +24 V, RA to I0.5 and the purple lamp wire, RB to the health lamp. Confirm on the old panel (section 4.2)."],
-    ["Q0.2 (fault reset wire to the VFD)", "CHECK", "The program switches Q0.2, but your sketch shows no wire. Look on the old panel."],
+    ["VFD relay, purple wire, health lamp", "OK",
+     "Your sketch: RC = +24 V, RA to I0.5 and the purple lamp wire, RB to the health lamp. The old drive has the relay set to \"fault indication\" (03.00 = 8), "
+     "which is exactly what this wiring needs (section 7)."],
+    ["Q0.2 (fault reset wire to the VFD)", "CHECK", "The program switches Q0.2, but your sketch shows no wire. The VFD-EL-W has only inputs MI1 - MI3, and the old drive's free input MI3 "
+     "has no function (04.05 = 0), so a Q0.2 wire would do nothing: leave Q0.2 unwired, as on the old panel. A drive fault is reset with the drive's STOP/RESET key."],
     ["PC program (Lux WMS)", "OK - found",
      "It is in conveyor_automation-main / Frontend. Three Python packages are used but not listed in its install file (section 12)."],
     ["Camera settings", "CHECK",
      "Two setting files are in your folder (saved 19 and 23 Feb 2026). The picture-upload port inside them (21 / 8080) is not the port "
      "the PC program uses (2005), so they are close but not the final settings. Best: export the settings again from the old camera (section 8)."],
-    ["VFD parameter settings", "MISSING", "Not in any file. A new drive has factory settings. Copy them from the old drive (section 7)."],
+    ["VFD parameter settings", "OK - read", "All 306 parameters were read from the old drive on 7 Oct 2026. Their meaning and the list to set are in section 7 and Appendix C."],
     ["Power for camera and light", "CHECK", "Not on your drawing and \"not confirmed\" in the BOM. Find how the old camera and light get 24 V."],
 ], [44, 30, 100], status_col=1)
 d.box("<b>Safety.</b> The panel contains 230 VAC. Mains wiring, the VFD and the motor must be wired and checked by a qualified electrician, "
@@ -120,14 +132,12 @@ d.box("<b>Safety.</b> The panel contains 230 VAC. Mains wiring, the VFD and the 
 # ------------------------------------------------------------------ 3
 d.h1("3. Do this on the OLD machine before you buy or dismantle anything")
 d.table(["#", "What", "How", "Why"], [
-    ["1", "Reverse test in manual mode",
-     "Selector at MANUAL. Press and hold the red STOP button. Does the conveyor run in reverse?<br/>"
-     "<b>NO</b> (only the HMI REV JOG button reverses): the file \"latest plc\" is right. Use it.<br/>"
-     "<b>YES</b>: the old PLC holds a newer program than the file. Read it out of the old PLC with TIA Portal V21 "
-     "(<b>Online &gt; Upload device as new station</b>) and load that into the new PLC.",
-     "This is the only point where your description and the saved program differ. The last change in the file is from 25 Feb 2026."],
-    ["2", "VFD parameters", "See section 7 (keypad, or laptop with a USB-RS485 adapter and the tool in your folder). "
-     "Also note the position of the small NPN / PNP switch on the drive.", "Without them the new drive will not run correctly."],
+    ["1", "Reverse test in manual mode: <b>settled</b>",
+     "You confirmed on 12 Oct 2026: the red button does <b>not</b> reverse on the old machine; it was wanted but never built. "
+     "So the file \"latest plc\" matches the machine. The reverse jog is added as a new feature (section 6.2).",
+     "Nothing left to test here."],
+    ["2", "VFD: two things to look at", "The parameters are read already (7 Oct). Look only at: (a) the small NPN / PNP switch on the old drive (it should be at PNP), "
+     "(b) whether any wire goes from PLC Q0.2 to the drive (expected: none).", "Section 7.2 explains both."],
     ["3", "Camera", "Connect the HIKROBOT IDMVS software to the old camera and export its settings to a file. "
      "Photograph the camera cable: which wire carries the sensor signal, and where the camera and the light get their power.",
      "The saved setting files are a few days older than the final machine."],
@@ -136,7 +146,7 @@ d.table(["#", "What", "How", "Why"], [
     ["5", "Wire-by-wire photos", "Every PLC terminal, the VFD control terminals (RA, RB, RC, MI1, MI2, DCM, 24V) and the terminal strips.",
      "To settle the CHECK points of section 2."],
 ], [7, 30, 86, 51])
-d.box("<b>Best extra protection:</b> even if the answer to item 1 is NO, do <b>Online &gt; Upload device as new station</b> once on the old PLC "
+d.box("<b>Best extra protection:</b> do <b>Online &gt; Upload device as new station</b> once on the old PLC "
       "and keep the result. It is the only copy that is certain to be what the old machine runs.", OKC)
 
 # ------------------------------------------------------------------ 4
@@ -151,9 +161,10 @@ d.table(["PLC terminal", "Your drawing", "Program", "Result"], [
     ["I0.4", "Em switch", "Emergency stop (NC contact)", "OK - confirm the contact is NC"],
     ["I0.5", "To VFD relay RA", "VFD fault. Input ON = fault", "OK"],
     ["I0.6", "Joined to the I0.5 / RA wire, with the purple lamp wire", "Not used", "OK - the screw is only used as a joint. Copy it."],
+    ["I0.7", "Nothing", "Spare (tag DI_SPARE I0.7)", "OK. Gets a new wire only if you add the red-button reverse (section 6.2)."],
     ["Q0.0", "To VFD", "Conveyor FORWARD", "OK"],
     ["Q0.1", "To VFD", "Conveyor REVERSE", "OK"],
-    ["Q0.2", "Nothing", "Fault RESET signal to the VFD", "CHECK - look for a wire from Q0.2 to a VFD input. If there is none, "
+    ["Q0.2", "Nothing", "Fault RESET signal to the VFD", "OK - leave unwired: the VFD-EL-W has only MI1 - MI3 and MI3 has no function (04.05 = 0). So "
      "the HMI reset clears the PLC alarm only, and the VFD must be reset at the drive."],
     ["Q0.3", "Lamp green", "Auto cycle started", "OK"],
     ["Q0.4", "Lamp red", "Fault", "OK"],
@@ -170,8 +181,8 @@ d.table(["VFD terminal", "Goes to", "What it does"], [
     ["RB (closed while the relay is at rest)", "The \"VFD healthy\" indicator lamp on the panel door (other lamp wire to 0 V)",
      "Lamp ON while the drive has no fault"],
 ], [44, 70, 60])
-d.box("This works only when the VFD relay is set to <b>\"fault\"</b> (parameter 03.00 on Delta VFD-EL drives). Copy the value from the old drive. "
-      "My reading of the words \"(Indicator) - RB\" and \"24V - RC\" on the sketch is not certain. Trace these three wires on the old panel.")
+d.box("The old drive has parameter <b>03.00 = 8 = fault indication</b> (read on 7 Oct 2026; meaning from the Delta manual). With this setting the relay behaves "
+      "exactly as the table says, so the sketch and the drive agree. Set 03.00 = 8 on the new drive too (it is also the factory value).", OKC)
 d.h2("4.3 Power drawing")
 d.table(["Your drawing", "BOM part", "Result"], [
     ["Main power L, N to main switch", "Salzer 16 A rotary isolator", "OK"],
@@ -239,6 +250,7 @@ d.table(["Input", "Device", "Contact", "Wiring", "Input is ON when"], [
     ["I0.4", "Emergency stop", "NC", "+24 V - contact - I0.4", "Emergency NOT pressed (normal)"],
     ["I0.5", "VFD fault relay", "RA - RC", "+24 V - RC, RA - I0.5", "VFD has a fault"],
     ["I0.6", "Joint only", "-", "Wire link from I0.5, plus the purple lamp wire", "(not used by the program)"],
+    ["I0.7", "<b>New, optional:</b> red button, one extra NO contact block", "NO", "+24 V - new contact - I0.7", "Red button held (reverse jog in MANUAL; how-to guide part 12)"],
 ], [14, 40, 20, 58, 42])
 d.box("With normal healthy conditions the PLC input LEDs must show: I0.3 ON, I0.4 ON, I0.5 OFF. "
       "If I0.3 or I0.4 is OFF the machine will never start. If I0.5 is ON the PLC shows VFD FAULT.")
@@ -246,7 +258,7 @@ d.h2("6.3 Outputs (bottom terminal row). Each output gives +24 V when ON")
 d.table(["Output", "Goes to", "Function"], [
     ["Q0.0", "VFD forward run input (MI1 on Delta EL)", "Conveyor forward (auto and manual)"],
     ["Q0.1", "VFD reverse run input (MI2 on Delta EL)", "Conveyor reverse (manual only)"],
-    ["Q0.2", "VFD fault reset input, only if wired on the old panel", "ON while the HMI FAULT RESET button is pressed"],
+    ["Q0.2", "<b>Not connected</b> (the VFD-EL-W has no input set to reset)", "ON while the HMI FAULT RESET button is pressed; resets only the PLC alarm"],
     ["Q0.3", "Signal tower GREEN", "Auto cycle started"],
     ["Q0.4", "Signal tower RED", "Fault present"],
     ["Q0.5", "Signal tower AMBER / yellow", "Manual mode selected"],
@@ -255,50 +267,87 @@ d.table(["Output", "Goes to", "Function"], [
 
 # ------------------------------------------------------------------ 7
 d.h1("7. VFD and motor")
-d.bullets([
-    "<b>Motor link plates:</b> the motor is 230 / 400 V (delta / star). The VFD gives 3-phase 230 V, so the motor terminal box must be connected in <b>DELTA</b>. Rated current in delta is 1.82 A.",
-    "<b>Control wiring:</b> PLC Q0.0 to MI1 (forward), Q0.1 to MI2 (reverse). The PLC outputs give +24 V, so the VFD digital common (DCM) must be joined to the panel 0 V, "
-    "and the drive NPN / PNP switch must be in the same position as on the old drive.",
-    "<b>Relay:</b> RC, RA, RB as in section 4.2.",
-    "<b>Speed:</b> find where the old drive gets its speed (keypad knob, fixed parameter or a potentiometer) and copy it. The PLC does not send a speed value."])
-d.p("Parameters that matter for this machine, with the <b>raw values read from the old drive on 7 October 2026</b> "
-    "(full list: 04_VFD/old_vfd_2026-10-07/old_vfd_parameters.txt). Raw values have no decimal point (5000 = 50.00 Hz). "
-    "Option numbers (like 02.00 = 4) are codes: check their meaning in the Delta VFD-EL manual, but always set the <b>same value as the old drive</b>.")
-d.table(["Parameter", "Meaning", "Old drive (raw)", "Note"], [
-    ["01.00", "Maximum output frequency", "7000", "70.00 Hz"],
-    ["01.01 / 01.02", "Motor rated frequency, motor rated voltage", "5000 / 2200", "50.00 Hz / 220.0 V"],
-    ["01.09 / 01.10", "Acceleration / deceleration time", "50 / 5", "Copy exactly (0.1 s steps: 5.0 s / 0.5 s, check in manual)"],
-    ["02.00", "Source of the speed command", "4", "Option code: copy exactly"],
-    ["02.01", "Source of the run command", "1", "Option code: copy exactly (expected: external terminals)"],
-    ["03.00", "Function of relay RA / RB / RC", "8", "Option code: copy exactly (expected: fault indication)"],
-    ["04.04", "2-wire / 3-wire control mode", "0", "Option code: copy exactly"],
-    ["04.05 / 04.06", "Function of further MI inputs", "0 / 0", "Copy exactly. Compare with the Q0.2 wire question (section 4.1)"],
-    ["07.00", "Motor rated current", "25", "2.5 A. Copy this. (The motor plate says 1.82 A; setting 1.82 A would be a deliberate change from the old machine, for an electrician to decide.)"],
-], [24, 52, 24, 74])
-d.h2("How to copy the parameters from the old drive")
+d.p("This section is now exact. The values were read from the old drive on 7 October 2026 (all 306 parameters), and their meanings are taken from the "
+    "<b>Delta VFD-EL user manual</b> (parameter summary, chapter 4.1). Your drive is the VFD-EL-W, the same family with the same parameter numbers; "
+    "it has a few extra parameters that this manual does not list (marked in Appendix C).")
+d.h2("7.1 What the old drive is set to do")
+d.table(["Question", "Answer on the old drive", "Parameter"], [
+    ["Where does the speed come from?", "From the <b>round knob (potentiometer) on the drive's keypad</b>. The PLC sends no speed. Range 0 to 70 Hz.", "02.00 = 4, 01.00 = 70.00 Hz"],
+    ["Where does run / stop come from?", "From the <b>control terminals</b> (the PLC wires). The STOP key on the keypad also works.", "02.01 = 1"],
+    ["Which terminal does what?", "<b>MI1</b> = forward while ON, <b>MI2</b> = reverse while ON (2-wire mode).", "04.04 = 0"],
+    ["Which terminals are used? (VFD-EL-W)", "The EL-W has only <b>MI1, MI2, MI3</b>. <b>04.19 = 1</b> switches on 2-wire control so that MI2 means reverse "
+     "(with 04.19 = 0, the factory value, MI1 is run/stop only and <b>reverse does not work</b>). MI3: no function. 04.06 - 04.08 belong to inputs the EL-W does not have; "
+     "copy them only to be identical.", "04.19 = 1, 04.05 = 0, 04.06 = 0, 04.07 = 5, 04.08 = 14"],
+    ["What does the relay RA / RB / RC do?", "<b>Fault indication</b>: RA - RC closes on a fault, RB - RC is closed while healthy.", "03.00 = 8"],
+    ["How fast does it start and stop?", "Start ramp 5.0 s, stop ramp 0.5 s, ramp to stop.", "01.09 = 5.0, 01.10 = 0.5, 02.02 = 0"],
+    ["Motor data", "50 Hz, 220 V. Motor current setting 2.5 A (the drive's own rating; the motor plate says 1.82 A).", "01.01 = 50.00, 01.02 = 220.0, 07.00 = 2.5"],
+    ["Motor overload protection by the drive", "<b>Switched off</b> (this is also the factory setting).", "06.06 = 2"],
+    ["Does it start by itself at power-on or after a fault?", "No.", "02.05 = 1, 08.15 = 0"],
+    ["Fault history", "Empty: no fault was stored. The motor has run 633 minutes in total.", "06.08 - 06.12 = 0, 07.10 = 633"],
+], [50, 84, 40])
+d.h2("7.2 Wiring that follows from these settings")
+d.table(["Wire", "From", "To", "Why it is certain"], [
+    ["Forward", "PLC Q0.0", "VFD <b>MI1</b>", "04.04 = 0: MI1 is forward / stop"],
+    ["Reverse", "PLC Q0.1", "VFD <b>MI2</b>", "04.04 = 0: MI2 is reverse / stop"],
+    ["Fault reset", "PLC Q0.2", "<b>Nothing</b> (leave unwired)", "No EL-W input is set to reset (MI3: 04.05 = 0). Reset a drive fault with the drive's STOP/RESET key"],
+    ["Input common", "Panel 0 V (PLC 3M)", "VFD <b>DCM</b>", "The PLC outputs give +24 V; the current must return to 0 V through DCM"],
+    ["Input mode switch", "-", "Small switch on the drive at <b>PNP</b>", "With +24 V signals the inputs only work in PNP mode. The factory position is NPN: move it on the new drive, power OFF"],
+    ["Fault to PLC", "+24 V to VFD <b>RC</b>", "VFD <b>RA</b> to PLC I0.5 (and the link to I0.6 with the purple lamp wire)", "03.00 = 8: RA - RC closes on a fault"],
+    ["Healthy lamp", "VFD <b>RB</b>", "\"VFD healthy\" lamp, other lamp wire to 0 V", "RB - RC is closed while there is no fault"],
+    ["Power", "MCB C10: L, N", "VFD R/L1, S/L2", "Single-phase 230 V drive"],
+    ["Motor", "VFD U, V, W", "Motor, connected in <b>DELTA</b> (230 V)", "Motor 230 / 400 V; the drive gives 3 x 230 V. Rated current in delta 1.82 A"],
+], [24, 34, 52, 64])
+d.box("<b>Checked on control box 2 (15 Oct 2026):</b><br/>"
+      "1. Confirmed on 15 Oct 2026 (control box 2): with MI1 = Q0.0, MI2 = Q0.1, DCM = 0 V, PNP and <b>04.19 = 1</b>, forward and reverse both work. Q0.2 stays unwired.<br/>"
+      "2. The position of the NPN / PNP switch: PNP (the PLC outputs give +24 V).", OKC)
+d.h2("7.3 Set up the new drive")
+d.steps([
+    "Power OFF: wire as in 7.2 and move the input mode switch to <b>PNP</b>. Leave the motor cable off for the first power-up.",
+    "Power ON, only the drive (MCB C10). The display lights up and shows no fault code.",
+    "Read the new drive with the laptop tool and compare it with the old drive (7.4). The comparison lists exactly the parameters that are different.",
+    "Enter each different value with the keypad: press <b>ENTER</b> (the parameter group shows), choose the group with the UP / DOWN keys, <b>ENTER</b>, "
+    "choose the parameter number, <b>ENTER</b>, set the value, <b>ENTER</b>. The display shows <b>End</b> when the value is saved, or <b>Err</b> when it is not accepted. "
+    "<b>MODE</b> goes back.",
+    "Read the new drive once more and compare again. Nothing should be left, except read-only and counter values.",
+    "Speed: on the <b>old</b> drive, with the conveyor stopped, press MODE until the display shows <b>F</b> and a number: that is the speed setting of the knob. "
+    "Turn the knob of the new drive until it shows the same number.",
+    "Power OFF, connect the motor, power ON, and test the direction with FWD JOG (section 13)."])
+d.p("<b>What the comparison will most likely list.</b> These are the old values that differ from the factory values printed in the VFD-EL manual. "
+    "The EL-W may have slightly different factory values, so the comparison of step 3 decides; this table tells you what to expect and what each one is for.")
+d.table(["Parameter", "Set to", "Factory (manual)", "What it is"], [
+    ["00.12", "1", "0", "50 Hz base voltage: 1 = 220 V / 380 V"],
+    ["01.00", "70.00", "60.00", "Maximum output frequency (top of the knob range)"],
+    ["01.01", "50.00", "60.00", "Motor rated frequency"],
+    ["01.09", "5.0", "10.0", "Acceleration time, seconds"],
+    ["01.10", "0.5", "10.0", "Deceleration time, seconds"],
+    ["02.00", "4", "1", "Speed from the keypad knob"],
+    ["03.08", "3", "0", "Cooling fan: on when the heat sink is warm"],
+    ["04.05", "0", "1", "MI3: no function"],
+    ["04.06", "0", "2", "MI4: no function"],
+    ["04.07", "5", "3", "MI5 function (no MI5 terminal on the EL-W): only to be identical"],
+    ["<b>04.19</b>", "<b>1</b>", "0", "<b>Start / stop mode: 2-wire, MI2 = reverse. Without it reverse does not work</b>"],
+    ["04.08", "14", "4", "MI6: external fault input"],
+    ["01.12, 01.13", "0.1, 0.1", "10.0, 1.0", "Second deceleration time and jog acceleration time: not used by this machine, set them only to be identical"],
+    ["02.11, 02.12", "50.00, 50.00", "60.00, 60.00", "Keypad / communication frequency: not used (speed comes from the knob), set them only to be identical"],
+    ["07.08", "0.10", "0.30", "Torque compensation time constant: set it if the comparison lists it"],
+], [28, 28, 30, 88])
+d.box("<b>Do not copy:</b> 00.02 (parameter reset: 9 or 10 erases all settings), the read-only values (00.00, 00.01, 00.06, 02.16, 02.17, 03.13, 04.26), "
+      "the fault records (06.08 - 06.12) and the run-time counter (07.10).", BAD)
+d.box("<b>Motor protection, for your electrician to decide:</b> the old drive has the motor overload protection switched off (06.06 = 2) and the motor current at 2.5 A, "
+      "while the motor plate says 1.82 A. An exact copy keeps this. Better protection would be 06.06 = 0 and 07.00 = 1.8; that is a deliberate change from the old machine.", CHK)
+d.h2("7.4 Read and compare with the laptop tool")
 d.box("<b>Do not connect the drive to the laptop with an Ethernet cable.</b> The RJ45 socket on the drive looks like a network socket, "
       "but it is an <b>RS-485 serial</b> port. A laptop network port cannot talk to it, and one pin of that socket carries a supply voltage.", BAD)
-d.table(["Way", "What you need", "Steps"], [
-    ["A. Keypad", "Nothing. About 30 minutes.",
-     "On the old drive press MODE until the parameter group shows, open each group (00, 01, 02 ...) and write down every value. "
-     "Do the same on the new drive. Enter on the new drive every value that is different."],
-    ["B. Laptop and the tool in your folder", "A USB-to-RS485 adapter (for example Delta IFD6500 or a generic one) and two wires.<br/>"
-     "Drive terminal <b>SG+</b> to adapter A / D+, terminal <b>SG-</b> to adapter B / D-. "
-     "The same two signals are on the RJ45 socket: pin 5 = SG+, pin 4 = SG-.",
-     "1. Old drive: DONE on 7 Oct 2026, saved in 04_VFD/old_vfd_2026-10-07/.<br/>"
-     "2. New drive ON, adapter connected:<br/><font face=\"DVM\">python3 04_VFD/read_vfd_parameters.py --port /dev/ttyUSB0 --out new_vfd.csv</font><br/>"
-     "3. <font face=\"DVM\">python3 04_VFD/read_vfd_parameters.py --compare 04_VFD/old_vfd_2026-10-07/old_vfd_parameters.csv new_vfd.csv</font><br/>"
-     "It prints only the parameters that differ. Enter those on the new drive with the keypad."],
-    ["C. Delta PC software", "The same adapter and Delta's free VFDSoft program.",
-     "It can save all parameters to a file and write them into the new drive. Check first that your VFDSoft version lists the VFD-EL-W."],
-], [30, 56, 88])
-d.bullets(["The tool <b>04_VFD/read_vfd_parameters.py</b> only reads and never writes to the drive (it refuses to send anything but Modbus function 03). "
-           "It was used on the real old drive on 7 October 2026: Modbus ASCII 7N2, 9600 baud, address 1, 306 parameters, all group 00 values matching the keypad.",
-           "Its numbers are raw: the drive stores 10.0 as 100 and 50.00 as 5000. Compare raw with raw.",
-           "The SG+ / SG- screw terminals and the RJ45 pins (3 = GND, 4 = SG-, 5 = SG+) are from Delta's VFD-EL-W catalog. I could read only a summary of it, "
-           "so look for the labels SG+ and SG- on the terminal strip of your drive before you connect. If you use the RJ45 socket, leave all other pins unconnected and insulated.",
-           "Reading does not change the drive. Do it with the conveyor stopped, and do not remove any existing wire.",
-           "If you connect the adapter to this laptop and tell me, I can run the tool with you and turn the result into a short setting list for the new drive."])
+d.steps([
+    "Power OFF. Connect the USB-to-RS485 adapter (the Sharvi ISO-B-RS485-A used on 7 October): adapter <b>A+</b> to drive terminal <b>SG+</b>, adapter <b>B-</b> to <b>SG-</b>. GND is not connected.",
+    "Power ON, only the drive. Plug the adapter into the laptop (the Lenovo; the adapter appears as /dev/ttyUSB0).",
+    "In the PLC folder run:<br/><font face=\"DVM\">/usr/bin/python3 04_VFD/read_vfd_parameters.py --port /dev/ttyUSB0 --out 04_VFD/new_vfd_parameters.csv</font>",
+    "Then:<br/><font face=\"DVM\">/usr/bin/python3 04_VFD/read_vfd_parameters.py --compare 04_VFD/VFD_OLD_MACHINE/old_vfd_parameters.csv 04_VFD/new_vfd_parameters.csv</font><br/>"
+    "It prints only the parameters that differ, as raw numbers without the decimal point (5000 = 50.00). Or tell me, and I run both steps and give you the list."])
+d.bullets([
+    "The tool only reads. It cannot write, start, stop or reset the drive (it refuses to send anything but the Modbus read command).",
+    "It was used on the old drive on 7 October 2026: Modbus ASCII, 9600 baud, 7N2, address 1 (the factory communication settings, 09.00 - 09.04).",
+    "Without the laptop: read every value of the new drive with the keypad and compare it by hand with Appendix C."])
 
 # ------------------------------------------------------------------ 8
 d.h1("8. Sensor and camera")
@@ -376,6 +425,11 @@ d.steps([
     "If TIA asks to update the panel operating system to match the project, accept. Do not switch off during the update.",
     "In the preview tick \"Overwrite all\", click <b>Load</b>. The panel restarts and shows the project screens.",
     "Check: the panel shows live values and no \"#####\" fields. \"#####\" means the HMI cannot reach the PLC."])
+d.bullets([
+    "Screens of the old HMI (from the TIA export): AUTO, MANUAL, ALARMS, INPUT STATUS, OUTPUT STATUS, with template MAIN. The AUTO status field is green at AUTO RUNNING "
+    "and red at STOPPED; the I/O lamps are red when OFF and green when ON.",
+    "<b>The BACK button on OUTPUT STATUS does nothing in the old project</b>: it opens its own screen. If you copy the HMI exactly, use the IO STATUS button "
+    "at the bottom to go back. The how-to guide (10.5) shows the one-line fix."])
 
 # ------------------------------------------------------------------ 12
 d.h1("12. PC program (Lux WMS)")
@@ -419,6 +473,7 @@ d.table(["#", "Test", "Correct result"], [
     ["7", "Switch ON the VFD MCB. Enter the VFD parameters (section 7).", "VFD display normal, no fault code. VFD healthy lamp ON."],
     ["8", "Selector MANUAL. Hold FWD JOG on the HMI (or the green START button).", "Q0.0 ON, conveyor runs forward. If the direction is wrong, power off and swap two motor wires (U and V)."],
     ["9", "Hold REV JOG on the HMI.", "Q0.1 ON, conveyor runs in reverse."],
+    ["9b", "Only if you added the red-button reverse (how-to guide part 12): selector MANUAL, hold the red button, then release.", "Q0.1 ON while held, conveyor reverses; stops on release. In AUTO the red button still stops the cycle."],
     ["10", "Selector AUTO. Press START. The PC program is not needed for this step.", "Green lamp ON, conveyor runs forward."],
     ["11", "On the PC write 1 to register 40001 (Stop button, or the quick test of section 12). Then write 0.", "Conveyor stops at 1 (green lamp stays ON) and runs again at 0."],
     ["12", "Press STOP.", "Conveyor stops, green lamp OFF."],
@@ -436,20 +491,26 @@ d.bullets([
     "<b>The HMI shows \"AUTO RUNNING\" also while the PC has stopped the belt.</b> The HMI text only looks at the START / STOP state.",
     "<b>When the PLC is switched on, register 40001 is 0.</b> So START runs the conveyor even when the PC program is not running. Nothing checks the boxes then.",
     "<b>Network.</b> Any device on this network can write the register, and can also switch PLC outputs through Modbus. Keep the machine network separate from the office network.",
-    "<b>Alarms in the program:</b> \"EMERGENCY PB PRESSED FAULT (I0.4)\" and \"CONVEYOR VFD FAULT (I0.5)\". Both stay stored until FAULT RESET is pressed on the HMI."])
+    "<b>Alarms in the program:</b> \"EMERGENCY PB PRESSED FAULT (I0.4)\" and \"CONVEYOR VFD FAULT (I0.5)\". Both stay stored until FAULT RESET is pressed on the HMI.",
+    "<b>The PC cannot start the cycle.</b> It can only stop the belt (1) and let it run again (0). START on the panel, in AUTO, is always needed first.",
+    "<b>In MANUAL the red button does nothing</b> in the old program. Reverse comes only from the HMI REV JOG button, unless you add part 12 of the how-to guide."])
 
 # ------------------------------------------------------------------ appendix
 d.h1("Appendix A. Program reference")
 d.table(["Block", "Job"], [
     ["Main (OB1)", "Runs the six blocks below, in this order, again and again"],
-    ["FC_AUTO", "Start / stop memory; conveyor runs while started and register 40001 = 0; status number for the HMI (10 running, 20 stopped)"],
+    ["FC_AUTO", "6 networks. Working: 1 start / stop memory; 3 (first row) conveyor runs while started and register 40001 = 0; 6 status number for the HMI "
+     "(10 running, 20 stopped). Networks 2, 4, 5 and the rest of 3 are the old sensor cycle, switched off by a normally closed AlwaysTRUE contact"],
     ["FC_ALARMS", "Stores Emergency and VFD faults, makes the common FAULT signal"],
     ["FC_GENERAL", "Emergency healthy flag, Auto / Manual mode, fault reset from the HMI"],
-    ["FC_MANUAL", "Jog forward / reverse in manual mode"],
+    ["FC_MANUAL", "Jog in manual mode while held: forward from the HMI FWD JOG or the green START; reverse from the HMI REV JOG only"],
     ["FC_OUTPUTS", "Drives Q0.0 - Q0.5"],
     ["FC_TCP_IP", "Modbus TCP server on port 502, counts good and bad messages"],
     ["DB_HMI (DB1), DB_ALARMS (DB2), DB_AUTO (DB3), DB_CAMERA (DB5), DB_TCP_IP (DB12), MB_SERVER_DB (DB4)", "Data used by the blocks, the HMI and Modbus"],
 ], [60, 114])
+d.p("Tags: three PLC tag tables (DI, DO, Default). Clock memory byte ON at MB0, system memory byte at MB1. DB_TCP_IP is optimized; the other four DBs are not. "
+    "The exact program, network by network, is in the folder <b>07_Old_Program_Export</b> (OLD_PROGRAM_LOGIC.txt and OLD_HMI.txt) and in README section 11; "
+    "the how-to guide (Revision 3) draws every network exactly.")
 d.h1("Appendix B. Your hand drawings")
 for k, (name, caption, width) in enumerate([
         ("WhatsApp Image 2026-10-05 at 3.38.34 PM.jpeg", "Power distribution (18 Aug page)", 105),
@@ -461,5 +522,43 @@ for k, (name, caption, width) in enumerate([
     d.add(KeepTogether([Paragraph(caption, ST["h2"]), Image(path, width=width * mm, height=width * mm * h / w)]))
     d.sp(8)
 
-d.build(OUT, "Conveyor + Camera Control Panel - rebuild guide, revision 3", "Conveyor + Camera Control Panel - Rebuild Guide (Rev 3)")
+d.page()
+d.h1("Appendix C. Every non-zero setting of the old drive")
+d.p("Read from the old drive (VFD004EL21W-1) on 7 October 2026. Names, units and factory values are from the Delta VFD-EL user manual. "
+    "<b>Value</b> is what the keypad shows; <b>raw</b> is the number the laptop tool prints. All parameters not listed here are 0 on the old drive "
+    "(full list: 04_VFD/VFD_OLD_MACHINE/old_vfd_parameters.txt).")
+import csv as _csv
+from vfd_el_params import PARAMS as _VP, PID_NOTE as _PID, keypad_value as _kv
+_rows = []
+for _r in _csv.DictReader(open(os.path.join(ROOT, "04_VFD", "VFD_OLD_MACHINE", "old_vfd_parameters.csv"))):
+    _n, _raw = _r["parameter"], int(_r["raw_value"])
+    _grp = _n[:2]
+    if _grp == "12":
+        continue
+    _info = _VP.get(_n)
+    _fact_nonzero = bool(_info and _info[3] not in (None, "0", "0.0", "0.00"))
+    if _raw == 0 and not _fact_nonzero:
+        continue
+    if _grp == "10":
+        _rows.append([_n, "PID parameter", str(_raw), str(_raw), "-", _PID if not any(x[0].startswith("10.") for x in _rows) else "as above"])
+        continue
+    if _info is None:
+        _rows.append([_n, "(not in the VFD-EL manual)", str(_raw), str(_raw), "-", "EL-W only; compare with the new drive"])
+        continue
+    _name, _dec, _unit, _fact, _note = _info
+    _val = _kv(_n, _raw)
+    _shown = (_val + (" " + _unit if _unit else "")) if _val is not None else "see raw"
+    if _fact is None:
+        _cmp = ""
+    elif _val is not None and _val == _fact:
+        _cmp = "= factory. "
+    elif _val is not None and _fact[0].isdigit():
+        _cmp = "<b>DIFFERENT from factory.</b> "
+    else:
+        _cmp = ""
+    _rows.append([_n, _name, _shown, str(_raw), _fact or "-", _cmp + _note])
+d.table(["No.", "Name", "Value", "Raw", "Factory (manual)", "Note"], _rows, [13, 50, 22, 13, 24, 52])
+d.p("Group 12 is the drive's own table of how many parameters each group has; it is not a setting.")
+
+d.build(OUT, "Conveyor + Camera Control Panel - rebuild guide, revision 5", "Conveyor + Camera Control Panel - Rebuild Guide (Rev 5)")
 print("ok", OUT)

@@ -1,0 +1,3 @@
+parameter,modbus_address,new_drive_now,write_value,reason
+01.00,0x0100,6410,5000,new motor + gearbox + 100 mm roller: maximum 50 Hz (lowest allowed)
+04.02,0x0402,1000,748,knob gain 74.8 %: knob fully clockwise = 37.4 Hz = old belt speed 19.74 m/min

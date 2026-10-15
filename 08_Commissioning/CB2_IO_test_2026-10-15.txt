@@ -1,0 +1,254 @@
+INPUTS (1 = LED on):
+   I0.0 (empty)                 0
+   I0.1 AUTO/MANUAL selector    0
+   I0.2 START green             1
+   I0.3 STOP (NC)               1
+   I0.4 EMERGENCY (NC)          1
+   I0.5 VFD fault relay         0
+   I0.6 (joint only)            0
+   I0.7 spare                   0
+   I1.0 spare                   0
+   I1.1 spare                   0
+   I1.2 spare                   0
+   I1.3 spare                   0
+   I1.4 spare                   0
+   I1.5 spare                   0
+OUTPUTS:
+   Q0.0 VFD FWD                 1
+   Q0.1 VFD REV                 0
+   Q0.2 VFD RESET               0
+   Q0.3 lamp GREEN              0
+   Q0.4 lamp RED                0
+   Q0.5 lamp AMBER              1
+   Q0.6                         0
+   Q0.7                         0
+   Q1.0                         0
+   Q1.1                         0
+Register 40001 (PC run/stop) = 0
+
+WATCHING for 300 s - press the buttons now, one at a time:
+16:06:55.7  INPUT  I0.2 START green             1 -> 0
+16:06:55.7  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:07:03.7  INPUT  I0.2 START green             0 -> 1
+16:07:03.7  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:07:07.3  INPUT  I0.2 START green             1 -> 0
+16:07:07.3  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:07:14.4  INPUT  I0.2 START green             0 -> 1
+16:07:14.4  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:07:18.5  INPUT  I0.2 START green             1 -> 0
+16:07:18.5  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:07:18.9  INPUT  I0.3 STOP (NC)               1 -> 0
+16:07:19.6  INPUT  I0.3 STOP (NC)               0 -> 1
+16:07:20.9  INPUT  I0.3 STOP (NC)               1 -> 0
+16:07:21.8  INPUT  I0.3 STOP (NC)               0 -> 1
+16:07:22.0  INPUT  I0.3 STOP (NC)               1 -> 0
+16:07:22.2  INPUT  I0.3 STOP (NC)               0 -> 1
+16:07:40.1  INPUT  I0.2 START green             0 -> 1
+16:07:40.1  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:07:43.2  INPUT  I0.2 START green             1 -> 0
+16:07:43.2  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:07:43.6  INPUT  I0.3 STOP (NC)               1 -> 0
+16:07:44.1  INPUT  I0.3 STOP (NC)               0 -> 1
+16:07:46.5  INPUT  I0.2 START green             0 -> 1
+16:07:46.5  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:07:49.7  INPUT  I0.2 START green             1 -> 0
+16:07:49.8  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:07:50.3  INPUT  I0.3 STOP (NC)               1 -> 0
+16:07:51.0  INPUT  I0.3 STOP (NC)               0 -> 1
+16:07:52.6  INPUT  I0.4 EMERGENCY (NC)          1 -> 0
+16:07:52.6  OUTPUT Q0.4 lamp RED                0 -> 1
+16:07:55.4  INPUT  I0.4 EMERGENCY (NC)          0 -> 1
+16:07:56.3  OUTPUT Q0.2 VFD RESET               0 -> 1
+16:07:56.3  OUTPUT Q0.4 lamp RED                1 -> 0
+16:07:56.5  OUTPUT Q0.2 VFD RESET               1 -> 0
+16:07:57.4  OUTPUT Q0.2 VFD RESET               0 -> 1
+16:07:57.6  OUTPUT Q0.2 VFD RESET               1 -> 0
+16:08:03.1  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:03.3  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:04.4  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:08:05.3  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:08:05.5  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:08:06.0  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:08:06.9  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:07.1  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:07.3  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:08.8  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:09.1  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:08:11.1  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:08:11.3  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:08:12.0  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:08:12.9  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:08:13.9  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:08:14.4  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:16.2  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:18.2  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:18.8  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:19.1  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:08:19.8  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:08:21.1  INPUT  I0.2 START green             0 -> 1
+16:08:21.1  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:21.5  INPUT  I0.2 START green             1 -> 0
+16:08:21.5  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:21.9  INPUT  I0.2 START green             0 -> 1
+16:08:21.9  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:22.1  INPUT  I0.2 START green             1 -> 0
+16:08:22.1  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:23.2  INPUT  I0.2 START green             0 -> 1
+16:08:23.2  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:23.7  INPUT  I0.2 START green             1 -> 0
+16:08:23.7  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:24.1  INPUT  I0.2 START green             0 -> 1
+16:08:24.1  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:24.8  INPUT  I0.2 START green             1 -> 0
+16:08:24.8  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:25.0  INPUT  I0.3 STOP (NC)               1 -> 0
+16:08:25.4  INPUT  I0.3 STOP (NC)               0 -> 1
+16:08:25.6  INPUT  I0.3 STOP (NC)               1 -> 0
+16:08:25.7  INPUT  I0.3 STOP (NC)               0 -> 1
+16:08:28.1  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:08:29.2  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:08:29.4  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:08:32.0  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:08:33.2  INPUT  I0.2 START green             0 -> 1
+16:08:33.2  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:35.8  INPUT  I0.2 START green             1 -> 0
+16:08:35.8  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:36.3  INPUT  I0.3 STOP (NC)               1 -> 0
+16:08:36.9  INPUT  I0.3 STOP (NC)               0 -> 1
+16:08:44.5  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:08:45.2  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:08:45.5  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:48.2  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:54.0  INPUT  I0.3 STOP (NC)               1 -> 0
+16:08:54.9  INPUT  I0.3 STOP (NC)               0 -> 1
+16:08:56.4  INPUT  I0.2 START green             0 -> 1
+16:08:56.4  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:08:58.4  INPUT  I0.2 START green             1 -> 0
+16:08:58.4  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:08:58.9  INPUT  I0.2 START green             0 -> 1
+16:08:58.9  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:09:00.9  INPUT  I0.2 START green             1 -> 0
+16:09:00.9  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:09:01.0  INPUT  I0.2 START green             0 -> 1
+16:09:01.0  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:09:03.4  INPUT  I0.2 START green             1 -> 0
+16:09:03.4  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:09:07.2  INPUT  I0.3 STOP (NC)               1 -> 0
+16:09:07.4  INPUT  I0.3 STOP (NC)               0 -> 1
+16:09:08.3  INPUT  I0.3 STOP (NC)               1 -> 0
+16:09:10.6  INPUT  I0.3 STOP (NC)               0 -> 1
+16:09:11.9  INPUT  I0.3 STOP (NC)               1 -> 0
+16:09:12.7  INPUT  I0.3 STOP (NC)               0 -> 1
+16:09:14.8  INPUT  I0.3 STOP (NC)               1 -> 0
+16:09:17.6  INPUT  I0.3 STOP (NC)               0 -> 1
+16:09:27.6  INPUT  I0.2 START green             0 -> 1
+16:09:27.6  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:09:31.4  INPUT  I0.2 START green             1 -> 0
+16:09:31.4  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:09:32.4  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:09:33.5  INPUT  I0.4 EMERGENCY (NC)          1 -> 0
+16:09:33.5  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:09:33.5  OUTPUT Q0.4 lamp RED                0 -> 1
+16:09:33.6  INPUT  I0.4 EMERGENCY (NC)          0 -> 1
+16:09:34.4  INPUT  I0.4 EMERGENCY (NC)          1 -> 0
+16:09:36.3  INPUT  I0.4 EMERGENCY (NC)          0 -> 1
+16:09:36.6  OUTPUT Q0.2 VFD RESET               0 -> 1
+16:09:36.6  OUTPUT Q0.4 lamp RED                1 -> 0
+16:09:37.0  OUTPUT Q0.2 VFD RESET               1 -> 0
+16:09:37.4  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:09:37.9  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:09:38.1  OUTPUT Q0.1 VFD REV                 0 -> 1
+16:09:38.6  OUTPUT Q0.1 VFD REV                 1 -> 0
+16:09:38.8  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:09:39.9  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:09:40.7  INPUT  I0.2 START green             0 -> 1
+16:09:40.7  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:09:40.8  INPUT  I0.2 START green             1 -> 0
+16:09:40.9  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:09:41.2  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:09:41.4  INPUT  I0.2 START green             0 -> 1
+16:09:42.5  INPUT  I0.2 START green             1 -> 0
+16:09:42.5  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:09:44.5  INPUT  I0.2 START green             0 -> 1
+16:09:44.5  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:09:44.7  INPUT  I0.2 START green             1 -> 0
+16:09:44.7  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:09:45.1  INPUT  I0.2 START green             0 -> 1
+16:09:45.1  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:09:54.6  INPUT  I0.2 START green             1 -> 0
+16:09:54.6  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:09:55.3  INPUT  I0.3 STOP (NC)               1 -> 0
+16:09:56.0  INPUT  I0.3 STOP (NC)               0 -> 1
+16:09:57.6  INPUT  I0.2 START green             0 -> 1
+16:09:57.6  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:09:59.3  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:09:59.5  INPUT  I0.2 START green             1 -> 0
+16:10:01.1  INPUT  I0.2 START green             0 -> 1
+16:10:01.1  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:10:01.5  INPUT  I0.2 START green             1 -> 0
+16:10:01.5  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:10:03.6  INPUT  I0.2 START green             0 -> 1
+16:10:03.6  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:10:04.2  INPUT  I0.2 START green             1 -> 0
+16:10:04.2  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:10:04.6  INPUT  I0.2 START green             0 -> 1
+16:10:04.6  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:10:06.2  INPUT  I0.2 START green             1 -> 0
+16:10:06.2  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:10:08.3  INPUT  I0.3 STOP (NC)               1 -> 0
+16:10:09.2  INPUT  I0.3 STOP (NC)               0 -> 1
+16:10:10.9  INPUT  I0.3 STOP (NC)               1 -> 0
+16:10:11.2  INPUT  I0.3 STOP (NC)               0 -> 1
+16:10:11.9  INPUT  I0.2 START green             0 -> 1
+16:10:11.9  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:10:12.5  INPUT  I0.2 START green             1 -> 0
+16:10:12.5  OUTPUT Q0.0 VFD FWD                 1 -> 0
+16:10:13.2  INPUT  I0.4 EMERGENCY (NC)          1 -> 0
+16:10:13.2  OUTPUT Q0.4 lamp RED                0 -> 1
+16:10:17.2  INPUT  I0.4 EMERGENCY (NC)          0 -> 1
+16:10:31.1  INPUT  I0.3 STOP (NC)               1 -> 0
+16:10:31.9  INPUT  I0.3 STOP (NC)               0 -> 1
+16:10:32.0  INPUT  I0.3 STOP (NC)               1 -> 0
+16:10:32.4  INPUT  I0.3 STOP (NC)               0 -> 1
+16:10:32.8  INPUT  I0.2 START green             0 -> 1
+16:10:33.1  INPUT  I0.2 START green             1 -> 0
+16:10:33.3  INPUT  I0.2 START green             0 -> 1
+16:10:33.5  INPUT  I0.2 START green             1 -> 0
+16:10:33.7  INPUT  I0.2 START green             0 -> 1
+16:10:33.9  INPUT  I0.2 START green             1 -> 0
+16:11:19.3  INPUT  I0.1 AUTO/MANUAL selector    0 -> 1
+16:11:19.3  OUTPUT Q0.5 lamp AMBER              1 -> 0
+16:11:19.4  INPUT  I0.1 AUTO/MANUAL selector    1 -> 0
+16:11:19.4  OUTPUT Q0.5 lamp AMBER              0 -> 1
+16:11:20.0  INPUT  I0.1 AUTO/MANUAL selector    0 -> 1
+16:11:20.0  OUTPUT Q0.5 lamp AMBER              1 -> 0
+16:11:21.6  INPUT  I0.1 AUTO/MANUAL selector    1 -> 0
+16:11:21.6  OUTPUT Q0.5 lamp AMBER              0 -> 1
+16:11:30.3  INPUT  I0.1 AUTO/MANUAL selector    0 -> 1
+16:11:30.3  OUTPUT Q0.5 lamp AMBER              1 -> 0
+16:11:31.1  INPUT  I0.1 AUTO/MANUAL selector    1 -> 0
+16:11:31.1  OUTPUT Q0.5 lamp AMBER              0 -> 1
+16:11:31.8  INPUT  I0.1 AUTO/MANUAL selector    0 -> 1
+16:11:31.8  OUTPUT Q0.5 lamp AMBER              1 -> 0
+16:11:32.4  INPUT  I0.1 AUTO/MANUAL selector    1 -> 0
+16:11:32.4  OUTPUT Q0.5 lamp AMBER              0 -> 1
+16:11:34.0  INPUT  I0.1 AUTO/MANUAL selector    0 -> 1
+16:11:34.0  OUTPUT Q0.5 lamp AMBER              1 -> 0
+16:11:40.6  INPUT  I0.1 AUTO/MANUAL selector    1 -> 0
+16:11:40.6  OUTPUT Q0.5 lamp AMBER              0 -> 1
+16:11:41.3  INPUT  I0.2 START green             0 -> 1
+16:11:41.5  INPUT  I0.2 START green             1 -> 0
+16:11:41.9  INPUT  I0.2 START green             0 -> 1
+16:11:42.2  INPUT  I0.2 START green             1 -> 0
+16:11:43.1  INPUT  I0.1 AUTO/MANUAL selector    0 -> 1
+16:11:43.1  OUTPUT Q0.5 lamp AMBER              1 -> 0
+16:11:43.8  INPUT  I0.2 START green             0 -> 1
+16:11:44.4  INPUT  I0.2 START green             1 -> 0
+16:11:46.4  OUTPUT Q0.4 lamp RED                1 -> 0
+16:11:49.3  INPUT  I0.2 START green             0 -> 1
+16:11:49.3  OUTPUT Q0.0 VFD FWD                 0 -> 1
+16:11:49.3  OUTPUT Q0.3 lamp GREEN              0 -> 1
+16:11:49.5  INPUT  I0.2 START green             1 -> 0
+done
+
+[exited with code 0]

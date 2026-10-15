@@ -1,0 +1,23 @@
+17:01:46  Starting TIA Portal without user interface ...
+17:01:53  Opening project copy C:\Users\xprobotics\claude_work\old_project_copy\latest plc.ap21
+17:02:05  Project: latest plc
+17:02:06  Device: S7-1200 station_1  (System:Device.S71200)
+17:02:12    exported block Main  [OB 1, LAD, consistent=True]
+17:02:13    exported block FC_GENERAL  [FC 1, LAD, consistent=True]
+17:02:14    exported block DB_HMI  [GlobalDB 1, DB, consistent=True]
+17:02:14    exported block FC_MANUAL  [FC 2, LAD, consistent=True]
+17:02:14    exported block FC_ALARMS  [FC 3, LAD, consistent=True]
+17:02:14    exported block DB_ALARMS  [GlobalDB 2, DB, consistent=True]
+17:02:14    exported block FC_OUTPUTS  [FC 4, LAD, consistent=True]
+17:02:16    exported block FC_AUTO  [FC 5, LAD, consistent=True]
+17:02:16    exported block DB_AUTO  [GlobalDB 3, DB, consistent=True]
+17:02:16    exported block FC_TCP_IP  [FC 6, LAD, consistent=True]
+17:02:16    exported block DB_TCP_IP  [GlobalDB 12, DB, consistent=True]
+17:02:17    exported block DB_CAMERA  [GlobalDB 5, DB, consistent=True]
+17:02:17    exported tag table Default tag table
+17:02:17    exported tag table DI
+17:02:17    exported tag table DO
+17:02:17  Device: HMI_1  ()
+17:02:17    no PLC software in this device
+17:02:17  Closing the project WITHOUT saving.
+17:02:18  Export finished: C:\Users\xprobotics\claude_work\old_export_20261012_170146

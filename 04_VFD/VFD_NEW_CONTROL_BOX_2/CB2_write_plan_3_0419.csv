@@ -1,0 +1,2 @@
+parameter,modbus_address,new_drive_now,write_value,reason
+04.19,0x0413,0,1,same as the old drive
