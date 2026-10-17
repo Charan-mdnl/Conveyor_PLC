@@ -1,3 +1,0 @@
-NEW CONTROL BOX 1 - VFD
-Not read yet. When it is connected: read it first (as received), save as CB1_as_received_<date>.csv,
-then plan / write / verify exactly as for control box 2 (README section 5.3).

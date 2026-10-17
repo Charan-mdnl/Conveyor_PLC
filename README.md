@@ -3,7 +3,7 @@
 **Master notes file.** Every time something is done in this project, this file is updated.
 Read this file first before doing any work on the project.
 
-Last updated: **15 Oct 2026**
+Last updated: **17 Oct 2026**
 
 ---
 
@@ -25,7 +25,7 @@ We are building a **second, identical machine** with the same components, copyin
 | Name | What it is | VFD files |
 |---|---|---|
 | **OLD MACHINE** | The existing, working conveyor built by someone else (the original). Its VFD was only ever READ | `04_VFD/VFD_OLD_MACHINE/` (+ `VFD_OLD_MACHINE_BACKUP/`) |
-| **NEW CONTROL BOX 1** (CB1) | First of the two new control panels for the new conveyor. Not programmed yet | `04_VFD/VFD_NEW_CONTROL_BOX_1/` (empty so far) |
+| **NEW CONTROL BOX 1** (CB1) | First of the two new control panels. VFD read and programmed on 16 Oct 2026 | `04_VFD/VFD_NEW_CONTROL_BOX_1/` |
 | **NEW CONTROL BOX 2** (CB2) | Second new control panel. VFD read and programmed on 15 Oct 2026 | `04_VFD/VFD_NEW_CONTROL_BOX_2/` |
 
 File names start with the box code: `CB1_...`, `CB2_...`. **Tip:** put a sticker "CONTROL BOX 1" / "CONTROL BOX 2" on each panel and on its VFD, so they can never be mixed up. The VFD's run-time counter (07.10) also tells them apart: the OLD MACHINE had 633 min on 7 Oct, CB2 had 345 min as received.
@@ -190,13 +190,14 @@ PLC/
 │   ├── Conveyor_Panel_Rebuild_Guide.pdf          how to build/wire/load the new machine (Rev 5 + 15 Oct corrections: EL-W 04.19, no MI5; Appendix C = all old VFD settings)
 │   ├── Conveyor_Program_From_Scratch_TIA_V21.pdf  HOW: every click to write the PLC + HMI program yourself (Rev 3.2, 26 pages; exact TIA export; one row per item; every item marked NEEDED / USEFUL / NOT needed; FC_AUTO way A = 3 short networks)
 │   ├── Conveyor_Program_Explained.pdf             WHY: meaning of tags/DBs/blocks/networks + design method from a problem statement (Rev 2, 18 pages)
-│   └── pdf_source/                                Python scripts that generate the three PDFs (make_*.py, common.py, vfd_el_params.py = VFD parameter names/factory values)
+│   ├── Learn_PLC_Mini_Project.pdf                 LEARN: friendly 7-page course, a small bottle-filler project (tags, DB, every basic ladder instruction, SCL line, HMI, alarm, PLCSIM test) + where each idea is in the real conveyor (17 Oct 2026)
+│   └── pdf_source/                                Python scripts that generate the PDFs (make_learn_simple.py = the mini course) (make_*.py, common.py, vfd_el_params.py = VFD parameter names/factory values)
 ├── 03_Wiring_Photos/             hand drawings of the old panel wiring (5 Oct 2026)
 ├── 04_VFD/
 │   ├── VFD_OLD_MACHINE/          readout of the OLD MACHINE drive (7 Oct 2026). Locked, read-only
 │   ├── VFD_OLD_MACHINE_BACKUP/   second copy of the same
 │   ├── VFD_NEW_CONTROL_BOX_2/    CB2 drive: CB2_as_received_* (settings before any change, locked + backup/), CB2_write_plan.csv, CB2_write_result.csv, CB2_*_frames.txt logs
-│   ├── VFD_NEW_CONTROL_BOX_1/    CB1 drive: not read yet
+│   ├── VFD_NEW_CONTROL_BOX_1/    CB1 drive: CB1_as_received_2026-10-16.* (locked + backup/), CB1_write_plan.csv, CB1_write_result.csv, logs
 │   ├── read_vfd_parameters.py    READ-ONLY tool: reads all VFD parameters over RS-485
 │   ├── write_new_vfd.py          WRITE tool for the NEW drive only: plan / write (dry run without --yes) / verify, with safety locks
 │   ├── tests/                    simulated drive + 22 tests for the write tool (all pass, 15 Oct 2026)
@@ -383,6 +384,36 @@ Expected extra values on top of "same as old": **01.00 = 6410 (64.10 Hz), 07.00 
 - **CB2 final VFD = OLD MACHINE settings except:** 01.00 = 50.00 Hz, 04.02 = 74.8 %, 07.00 = 1.6 A, 06.06 = 0 (protection on). 04.19 = 1 like the old machine.
 - **Next: NEW CONTROL BOX 1**, the same way (read and save as received first).
 
+**16 Oct 2026: NEW CONTROL BOX 1 (CB1) VFD read and programmed**
+- **As received** (locked + `backup/`): `04_VFD/VFD_NEW_CONTROL_BOX_1/CB1_as_received_2026-10-16.csv/.json/.txt` (306 parameters, 567 frames, all fn 03).
+- Not factory-new: 473 min run time (CB2 had 346, the OLD MACHINE 633). Settings changed before:
+  - 02.01 = 0 (keypad run);
+  - **02.04 = 2 (forward disabled)**;
+  - 04.19 = 0 (MI2 cannot reverse);
+  - 01.01 = 60 Hz;
+  - MI4–MI6 different.
+- **Written, 17 parameters, all read back OK:**
+  - 01.00 6000→5000, 01.01 6000→5000, 01.09 100→50, 01.10 100→5, 01.12 100→1, 01.13 10→1;
+  - 02.01 0→1, 02.04 2→0, 02.11 2500→5000, 02.12 6000→5000;
+  - 04.02 1000→748, 04.06 1→0, 04.07 2→5, 04.08 3→14, 04.19 0→1;
+  - 06.06 2→0, 07.00 25→16.
+  - Log: 78 frames, 61 × fn 03, 17 × fn 06, no command register.
+- **Check before writing:** after the plan, CB1 = CB2's final settings, parameter by parameter (no difference).
+- **CB1 PLC (read-only Modbus snapshot, 16 Oct):** I0.3 = 1 and I0.4 = 1 at rest, so 1M is connected to 0 V. Amber lamp ON (MANUAL), no alarm.
+- **16 Oct, CB1 full I/O test** (`08_Commissioning/CB1_PLC_watch_2026-10-16.txt` + `CB1_VFD_watch_2026-10-16.txt`):
+  - **PLC logic all correct.** Selector, START, STOP (NC), E-stop (NC) and FAULT RESET (Q0.2 pulse) work; HMI FWD/REV jog → Q0.0 / Q0.1; AUTO + START → Q0.0 + green, STOP drops it.
+  - **BUT the VFD never saw MI1 / MI2** (04.26 stayed 63, the drive stayed STOP) while Q0.0 / Q0.1 were ON. The **tower light also stays dark**, although Q0.3–Q0.5 switch.
+  - **Diagnosis:** no voltage comes out of the PLC outputs, so the output supply **3L+ (+24 V) / 3M (0 V) is most likely not connected**. Same kind of fault as 1M on CB2. Confirm: Q0.5 to 0 V reads 0 V while amber is ON.
+  - Second check for the tower light: the bill says 220 V AC (it must be 24 V DC); the lamp common must go to 0 V.
+  - The VFD settings were intact during the test (01.00 = 5000, 07.00 = 16, Fcmd 37.40).
+- **16 Oct: fixed** (3L+ / 3M connected); the user reports "working" (tower light on).
+  - Fresh readout `CB1_after_write_check.csv`: all 17 writes stored; **CB1 = CB2 in every parameter** except the run-time counter.
+  - PLC at rest: I0.3 = I0.4 = 1, no alarm, amber ON.
+  - A power cycle of the VFD since the write was not confirmed by the user.
+- **17 Oct 2026: the user reports CB1 "done"**: the motor connected and tested after the 3L+ / 3M fix. **CB1 and CB2 are both programmed and working**, with identical VFD settings.
+- **Both boxes still open:** the PLC ⏚ to PE at the site (proper earth); the tower light 24 V DC check (bill says 220 V AC); camera + PC program + Ethernet switch not yet connected or tested (register 40001); the HMI ALARMS screen (alarm views not in the export).
+
+
 ### How to run the tool (from the PLC folder)
 
 The commands use `/usr/bin/python3`.
@@ -474,6 +505,9 @@ Not on any bill yet (bought at other shops, according to the user; details still
 ## 9. Change log of this README
 
 - 2026-10-12: autostart for the second Tailscale enabled (user asked). TIA on the laptop is unlicensed and cannot be reinstalled, so work with extra care.
+- 2026-10-17: CB1 reported done; learning notes "Learn PLC with a mini project" added (02_Guides_PDF/Learn_PLC_Mini_Project.pdf).
+- 2026-10-16: CB1: 3L+/3M fault found (outputs had no supply) and fixed by the user; VFD settings verified = CB2.
+- 2026-10-16: CB1 VFD saved as received and programmed (17 writes OK, = CB2 settings); CB1 PLC inputs OK.
 - 2026-10-15: CB2 speed confirmed by the user; everything pushed to the personal GitHub (Charan-mdnl/Conveyor_PLC). Company repo not updated.
 - 2026-10-15: roller Ø58.34 (old) vs Ø100 (new): CB2 set to 37.4 Hz (01.00 50 Hz + 04.02 74.8 %); the write tool updated for CB1.
 - 2026-10-15: CB2 forward/reverse OK; guide corrected (04.19, MI5); roller Ø100 mm found (speed recalculation pending the old roller Ø); earthing advice.
