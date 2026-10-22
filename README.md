@@ -3,7 +3,7 @@
 **Master notes file.** Every time something is done in this project, this file is updated.
 Read this file first before doing any work on the project.
 
-Last updated: **17 Oct 2026**
+Last updated: **22 Oct 2026**
 
 ---
 
@@ -489,6 +489,8 @@ Not on any bill yet (bought at other shops, according to the user; details still
 12. **Real PLC vs file:** upload the program from the OLD PLC (TIA: Online → Upload device as new station) and export it the same way. This shows whether the PLC holds a newer program, for example the red-button reverse the user remembers.
 
 13. **VS Code on the Windows laptop → this PC (Remote-SSH): WORKING since 12 Oct 2026.** The user works at the laptop, and Claude Code runs on this PC (logged in here, no OTP). The laptop key is `C:\Users\xprobotics\.ssh\id_ed25519`; the laptop's `~/.ssh/config` Host `charan-pc` → 100.74.159.40, user charan; the Remote-SSH extension is on the laptop. This PC: openssh-server installed and enabled; `~/.ssh/authorized_keys` allows the laptop key only from 127.0.0.1 / 100.64.0.0/10; linger on, so the user service `tailscale-xp` starts at boot (the hand-started copy is retired). Test `ssh charan-pc` from the laptop: OK. Use: VS Code on the laptop → bottom-left >< → Connect to Host → charan-pc → open /home/charan/Documents/PLC; install Claude Code "in SSH: charan-pc" once. SSH password login on this PC is OFF (`/etc/ssh/sshd_config.d/10-no-password.conf`, 12 Oct; checked: password refused, laptop key OK). Keep this PC on, charging, lid open.
+    - **22 Oct 2026 fix:** the network the PCs share keeps cutting this PC's Tailscale control connection ("offline"), so the laptop sometimes could not find it. Added a **direct local-network route**: laptop `~/.ssh/config` Host **`charan-pc-lan`** → `charan-Lenovo-Z50-70.local` (mDNS, avahi). This PC's `authorized_keys` now also allows the laptop key from private LANs (192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12; backups `*.bak-2026-10-22` on both machines). Use **charan-pc-lan** when both are on the same network, **charan-pc** (Tailscale) otherwise.
+    - **Measured:** SSH login 1.5 s (LAN) / 1.9 s (Tailscale). Slow VS Code connects come from VS Code itself: after every VS Code update on the laptop, this PC downloads and installs a new ≈640 MB server. The PC disk was 100 % full; two unused old VS Code server versions were deleted (≈1.4 GB freed, now 2.4 GB free). Biggest user folders: ~/Downloads 16 GB, ~/.local 7.5 GB, ~/miniforge3 4.3 GB, ~/.cache 3.1 GB (not touched).
 
 ---
 
@@ -505,6 +507,7 @@ Not on any bill yet (bought at other shops, according to the user; details still
 ## 9. Change log of this README
 
 - 2026-10-12: autostart for the second Tailscale enabled (user asked). TIA on the laptop is unlicensed and cannot be reinstalled, so work with extra care.
+- 2026-10-22: Remote-SSH fix: LAN host charan-pc-lan (mDNS) added; old VS Code servers removed (disk was 100 % full).
 - 2026-10-17: CB1 reported done; learning notes "Learn PLC with a mini project" added (02_Guides_PDF/Learn_PLC_Mini_Project.pdf).
 - 2026-10-16: CB1: 3L+/3M fault found (outputs had no supply) and fixed by the user; VFD settings verified = CB2.
 - 2026-10-16: CB1 VFD saved as received and programmed (17 writes OK, = CB2 settings); CB1 PLC inputs OK.
